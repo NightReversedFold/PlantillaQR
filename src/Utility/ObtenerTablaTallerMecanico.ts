@@ -10,7 +10,7 @@ const clavesQueMantenerTablaExpeditor = [
 ]
 
 export default async function obtenerTablaDePatenteDeTallerMecanico (patente: string): Promise<reduceType>  {
-    const arrayTallerRes:string[]  = await read('mantencion!A1:L110', '18RdbR-6GNHhp6P3AtC5scB7WSbZz0TuGgIG1B29QRu0')
+    const arrayTallerRes  = await read('mantencion!A1:L110', '18RdbR-6GNHhp6P3AtC5scB7WSbZz0TuGgIG1B29QRu0')
 
     const arrayTallerConPatente: string[] = arrayTallerRes!.find(
         (subArr: string[]) => {
