@@ -1,21 +1,27 @@
+
+import dotenv from 'dotenv';
+dotenv.config();
+const PORT = process.env.PORT;
 import express from 'express';
 import { Request, Response } from 'express';
 
 import tablaExpeditor from './Utility/ObtenerTablaExpeditor'
 import obtenerTablaDePatenteDeTablaExpeditor from './Utility/ObtenerTablaExpeditor';
 import obtenerTablaDePatenteDeTallerMecanico from './Utility/ObtenerTablaTallerMecanico';
-import { error } from 'console';
 
 import cors from "cors"
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 type obtenerDatos = {
     patente: string;
 }
 
-app.use(cors())
+app.use(cors({
+    origin: process.env.REACT_APP_API_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}))
 
 app.use(express.json());
 
@@ -31,7 +37,7 @@ app.get('/obtenerDatos/:patente', async (req: Request<obtenerDatos>, res: Respon
             tablaExpeditor(patente)
         ])
 
-        const [resExpeditor, resTaller]:any = results
+        const [resExpeditor, resTaller]: any = results
 
         arrayExpeditor = resExpeditor.status == 'fulfilled' ? resExpeditor.value : `Hubo un problema al tratar de obtener los datos del reporte flexible. ${resExpeditor.reason}`
         arrayTaller = resTaller.status == 'fulfilled' ? resTaller.value : `Hubo un problema al tratar de obtener los datos de la mantención. ${resTaller.reason}`
@@ -39,7 +45,7 @@ app.get('/obtenerDatos/:patente', async (req: Request<obtenerDatos>, res: Respon
         console.log(results)
 
         let oneGood = results.some(subArr => {
-           return subArr.status == 'fulfilled'
+            return subArr.status == 'fulfilled'
         })
 
         if (!oneGood) {
