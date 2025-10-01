@@ -1,21 +1,20 @@
 
 import dotenv from 'dotenv';
 dotenv.config();
+
 const PORT = process.env.PORT;
+
 import express from 'express';
 import { Request, Response } from 'express';
 
 import tablaExpeditor from './Utility/ObtenerTablaExpeditor'
-import obtenerTablaDePatenteDeTablaExpeditor from './Utility/ObtenerTablaExpeditor';
 import obtenerTablaDePatenteDeTallerMecanico from './Utility/ObtenerTablaTallerMecanico';
 
 import cors from "cors"
 
-const app = express();
+import { UrlPatente } from './types/Url';
 
-type obtenerDatos = {
-    patente: string;
-}
+const app = express();
 
 app.use(cors({
     origin: process.env.REACT_APP_API_URL,
@@ -25,7 +24,7 @@ app.use(cors({
 
 app.use(express.json());
 
-app.get('/obtenerDatos/:patente', async (req: Request<obtenerDatos>, res: Response) => {
+app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response) => {
     const patente = req.params.patente
 
     let arrayExpeditor: string[] | string
@@ -36,6 +35,8 @@ app.get('/obtenerDatos/:patente', async (req: Request<obtenerDatos>, res: Respon
             obtenerTablaDePatenteDeTallerMecanico(patente),
             tablaExpeditor(patente)
         ])
+
+        console.log(results)
 
         const [resExpeditor, resTaller]: any = results
 
@@ -64,5 +65,5 @@ app.get('/obtenerDatos/:patente', async (req: Request<obtenerDatos>, res: Respon
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    console.log(`Servidor corriendo en PORT`);
 });
