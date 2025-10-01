@@ -1,4 +1,4 @@
-const { google } = require("googleapis");
+import { google } from "googleapis";
 
 
 const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS!);
