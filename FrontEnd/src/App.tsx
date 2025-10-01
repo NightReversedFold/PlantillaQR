@@ -16,10 +16,12 @@ function App() {
 
   console.log(patente)
 
+  console.log(import.meta.env.VITE_BACKEND_URL)
+
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetch(`http://localhost:3000/obtenerDatos/${patente}`)
+        const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/obtenerDatos/${patente}`)
         const transformed = await data.json()
 
         console.log(transformed)
