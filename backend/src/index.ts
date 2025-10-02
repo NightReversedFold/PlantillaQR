@@ -1,10 +1,5 @@
 
-import dotenv from 'dotenv';
-
-if (process.env.NODE_ENV !== 'production') {
-    dotenv.config(); 
-}
-const PORT = process.env.PORT;
+import {PORT,CORS_url} from './Utility/config'
 
 import express from 'express';
 import { Request, Response } from 'express';
@@ -19,7 +14,7 @@ import { UrlPatente } from './types/Url';
 const app = express();
 
 app.use(cors({
-    origin: process.env.REACT_APP_API_URL,
+    origin: CORS_url,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }))
