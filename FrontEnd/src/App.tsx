@@ -24,7 +24,7 @@ function App() {
         const data = await fetch(`${'https://plantillaqr.onrender.com'}/obtenerDatos/${patente}`)
         const transformed = await data.json()
 
-        console.log(transformed)
+        console.log(transformed,'xd')
 
         if (!data.ok) {
           setError(transformed.error || 'Error desconocido. Intenta recargar la página.')
