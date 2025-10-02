@@ -42,7 +42,7 @@ function App() {
   }, [])
 
   return (
-    <div className='w-[100%] h-[100vh] flex justify-center items-center flex-col bg-green-100'>
+    <div className='w-[100%] min-h-[120vh] flex justify-center items-center flex-col bg-green-100'>
       <h1 className='text-3xl sm:text-5xl text-center mb-5'>Información del vehiculo</h1>
 
       <div className='w-[90%] h-[85%]  bg-sky-900 text-white p-5 flex  flex-col items-center justify-center gap-y-10'>
@@ -76,6 +76,12 @@ function App() {
               {error}
             </p> : 'Cargando datos...'
         }
+
+        <div className='w-full flex justify-center text-center hover:bg-slate-700  h-[10%] '>
+          <div className='bg-amber- w-[80%] bg-slate-500 align-middle '>
+            <a className='' target='_blank' href="https://docs.google.com/forms/d/e/1FAIpQLSdT5pZGXZr9oN59QETtl6DlRNxviv3vo09M2B3RLgy0auycRg/viewform?usp=sharing&ouid=114554944640707248727">Checklist control de vehículo</a>
+          </div>
+        </div>
       </div>
 
     </div>
