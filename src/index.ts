@@ -13,11 +13,7 @@ import { UrlPatente } from './types/Url';
 
 const app = express();
 
-app.use(cors({
-    origin: CORS_url,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
-}))
+app.use(cors())
 
 app.use(express.json());
 
