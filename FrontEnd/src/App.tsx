@@ -21,7 +21,7 @@ function App() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/obtenerDatos/${patente}`)
+        const data = await fetch(`${'https://plantillaqr.onrender.com'}/obtenerDatos/${patente}`)
         const transformed = await data.json()
 
         console.log(transformed)
