@@ -34,8 +34,8 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
 
         const [resExpeditor, resTaller]: any = results
 
-        arrayExpeditor = resExpeditor.status == 'fulfilled' ? resExpeditor.value : resExpeditor.reason?.message && resExpeditor.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos de mantención.` : `No se pudieron obtener los datos de la patente en la base de datos de mantención: Error desconocido: ${String(resExpeditor.reason)}`
-        arrayTaller = resTaller.status == 'fulfilled' ? resTaller.value : resTaller.reason?.message && resTaller.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos del taller.` : `No se pudieron obtener los datos de la patente en la base de datos del taller: Error desconocido: ${String(resTaller.reason)}`
+        arrayTaller = resExpeditor.status == 'fulfilled' ? resExpeditor.value : resExpeditor.reason?.message && resExpeditor.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos de mantención.` : `No se pudieron obtener los datos de la patente en la base de datos de mantención: Error desconocido: ${String(resExpeditor.reason)}`
+        arrayExpeditor = resTaller.status == 'fulfilled' ? resTaller.value : resTaller.reason?.message && resTaller.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos del taller.` : `No se pudieron obtener los datos de la patente en la base de datos del taller: Error desconocido: ${String(resTaller.reason)}`
 
         console.log(results)
 

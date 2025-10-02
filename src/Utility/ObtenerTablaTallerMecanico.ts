@@ -23,14 +23,16 @@ export default async function obtenerTablaDePatenteDeTallerMecanico (patente: st
     )
 
     const objetoConvertido = arrayTallerConPatente!.reduce<reduceType>((acc, valor, indx) => {
+        
+        
         acc[arrayTallerRes![1][indx]] = valor
+        
         return acc
     }, {})
 
     const objetoSinDatosInnecesarios:Record<string, any> = mantenerDatosObjeto(objetoConvertido,clavesQueMantenerTablaExpeditor)
-    objetoSinDatosInnecesarios['PATENTE/SERIE'] = patente
+    const objetoFinal = {'PATENTE/SERIE':patente,...objetoSinDatosInnecesarios}
+    
 
-    console.log(objetoSinDatosInnecesarios)
-
-    return objetoSinDatosInnecesarios
+    return objetoFinal
 }
