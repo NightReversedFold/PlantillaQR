@@ -8,7 +8,7 @@ function App() {
     }
   } | null>(null)
 
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const path = window.location.pathname;
   const partes = path.split('/');
