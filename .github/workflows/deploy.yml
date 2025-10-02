@@ -22,9 +22,9 @@ jobs:
         run: npm ci
         working-directory: FrontEnd
 
-      - name: Build Frontend
+      - name: Build FrontEnd
         run: npm run build
-        working-directory: Frontend
+        working-directory: FrontEnd
 
       # 4️⃣ Deploy a GitHub Pages
       - name: Deploy to GitHub Pages
