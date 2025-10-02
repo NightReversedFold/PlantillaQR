@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "nodemon --watch src/**/*.ts --exec npx ts-node src/index.ts",
     "build": "npm install && tsc",
-    "start": "node dist/index.js",
-    "postbuild": "cp dist/index.html dist/404.html"
+    "start": "node dist/index.js"
   },
   "keywords": [],
   "author": "",
