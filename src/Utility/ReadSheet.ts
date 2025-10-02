@@ -1,7 +1,8 @@
 import { google } from "googleapis";
 
+import {GOOGLE_CREDENTIALS} from './config'
 
-const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS!);
+const credentials = JSON.parse(GOOGLE_CREDENTIALS);
 
 const auth = new google.auth.GoogleAuth({
     credentials,
