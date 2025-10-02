@@ -21,7 +21,7 @@ function App() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await fetch(`${'https://plantillaqr.onrender.com'}/obtenerDatos/${patente}`)
+        const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/${patente}`)
         const transformed = await data.json()
 
         console.log(transformed,'xd')
