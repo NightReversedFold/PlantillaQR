@@ -48,8 +48,8 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
         }
         
         res.json({
-            Taller: arrayExpeditor,
-            Expeditor: arrayTaller
+            Taller: arrayTaller,
+            Expeditor: arrayExpeditor
         })
     }
     catch (e) {
