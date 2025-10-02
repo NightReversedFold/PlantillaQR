@@ -8,6 +8,7 @@ export default ({ mode }: { mode: string }) => {
   return defineConfig({
 
     plugins: [react(), tailwindcss()],
+    base: '/PlantillaQR/',
     server: {
       allowedHosts: true
     },
