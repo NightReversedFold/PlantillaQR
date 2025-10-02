@@ -11,8 +11,8 @@ const clavesQueMantenerTablaExpeditor = [
 
 export default async function obtenerTablaDePatenteDeTallerMecanico (patente: string): Promise<reduceType>  {
     const arrayTallerRes  = await read('mantencion!A1:L110', '18RdbR-6GNHhp6P3AtC5scB7WSbZz0TuGgIG1B29QRu0')
-
-    const arrayTallerConPatente: string[] = arrayTallerRes!.find(
+    
+    const arrayTallerConPatente: string[] | undefined = arrayTallerRes!.find(
         (subArr: string[]) => {
             return subArr.some(subStr =>{
                 const is = subStr.replace(/\s/g,'').includes(patente.replace(/\s/g, ''))
@@ -22,8 +22,8 @@ export default async function obtenerTablaDePatenteDeTallerMecanico (patente: st
         }
     )
 
-    const objetoConvertido = arrayTallerConPatente.reduce<reduceType>((acc, valor, indx) => {
-        acc[arrayTallerRes[1][indx]] = valor
+    const objetoConvertido = arrayTallerConPatente!.reduce<reduceType>((acc, valor, indx) => {
+        acc[arrayTallerRes![1][indx]] = valor
         return acc
     }, {})
 
