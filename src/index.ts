@@ -1,5 +1,5 @@
 
-import {PORT,CORS_url} from './Utility/config'
+import { PORT, CORS_url } from './Utility/config'
 
 import express from 'express';
 import { Request, Response } from 'express';
@@ -33,8 +33,8 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
 
         const [resExpeditor, resTaller]: any = results
 
-        arrayExpeditor = resExpeditor.status == 'fulfilled' ? resExpeditor.value : `Hubo un problema al tratar de obtener los datos del reporte flexible. ${resExpeditor.reason}`
-        arrayTaller = resTaller.status == 'fulfilled' ? resTaller.value : `Hubo un problema al tratar de obtener los datos de la mantención. ${resTaller.reason}`
+        arrayExpeditor = resExpeditor.status == 'fulfilled' ? resExpeditor.value : resExpeditor.reason.includes('Cannot read properties of') ? `No se pudieron obtener los datos del taller.` : `No se pudieron obtener los datos del taller. Error desconocido.`
+        arrayExpeditor = resTaller.status == 'fulfilled' ? resTaller.value : resExpeditor.reason.includes('Cannot read properties of') ? `No se pudieron obtener los datos del taller.` : `No se pudieron obtener los datos del taller. Error desconocido.`
 
         console.log(results)
 
