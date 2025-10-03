@@ -25,7 +25,7 @@ function App() {
 
   useEffect(() => {
 
-    socket.current = io('http://localhost:3000')
+    socket.current = io('https://plantillaqr-v2.onrender.com')
 
     socket.current.on('actualizarExcel', () => {
       setActualizarExcel(last => !last)
@@ -51,8 +51,6 @@ function App() {
         }
 
         setTablas(transformed)
-
-
 
       } catch (e) {
 
