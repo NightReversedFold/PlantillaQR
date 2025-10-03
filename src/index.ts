@@ -7,10 +7,11 @@ import { Request, Response } from 'express';
 import tablaExpeditor from './Utility/ObtenerTablaExpeditor'
 import obtenerTablaDePatenteDeTallerMecanico from './Utility/ObtenerTablaTallerMecanico';
 
+import { Server } from "socket.io";
+
 import cors from "cors"
 
 import { UrlPatente } from './types/Url';
-import { stringify } from 'node:querystring';
 
 const app = express();
 
@@ -30,7 +31,7 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
             tablaExpeditor(patente)
         ])
 
-        console.log(results,'lol que mal')
+        console.log(results, 'lol que mal')
 
         const [resExpeditor, resTaller]: any = results
         arrayTaller = resExpeditor.status == 'fulfilled' ? resExpeditor.value : resExpeditor.reason?.message && resExpeditor.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos del taller.` : `No se pudieron obtener los datos de la patente en la base de datos del taller: Error desconocido: ${String(resExpeditor.reason)}`
@@ -45,7 +46,7 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
         if (!oneGood) {
             throw new Error(`No se pudo obtener ningun dato del equipo.`)
         }
-        
+
         res.json({
             Taller: arrayTaller,
             Expeditor: arrayExpeditor
@@ -57,6 +58,18 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
 
 });
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en PORT`);
+const io = new Server(app.listen(PORT, () => {
+    console.log(`Servidor corriendo en PORT ${PORT}`);
+}), {
+    cors: {
+        origin: CORS_url, 
+        methods: ["GET", "POST"],
+    },
 });
+
+app.post('/excelActualizado', (req: Request<UrlPatente>, res: Response) => {
+    io.emit('actualizarExcel')
+
+    res.status(200).json({ success: true })
+})
+
