@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './styles.css'
+
+import { io, Socket } from "socket.io-client";
 
 function App() {
   const [tablas, setTablas] = useState<{
@@ -9,6 +11,9 @@ function App() {
   } | null>(null)
 
   const [error, setError] = useState<string | null>(null)
+  const socket = useRef<Socket | null>(null)
+
+  const [excelActaulizado, setActualizarExcel] = useState<boolean>(false)
 
   const path = window.location.pathname;
   const partes = path.split('/');
@@ -19,12 +24,25 @@ function App() {
   console.log(import.meta.env.VITE_BACKEND_URL)
 
   useEffect(() => {
+
+    socket.current = io('http://localhost:3000')
+
+    socket.current.on('actualizarExcel', () => {
+      setActualizarExcel(last => !last)
+    })
+
+    return () => {
+      socket.current?.disconnect()
+    }
+  }, [])
+
+  useEffect(() => {
+    console.log(excelActaulizado);
+
     (async () => {
       try {
         const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/${patente}`)
         const transformed = await data.json()
-
-        console.log(transformed,'xd')
 
         if (!data.ok) {
           setError(transformed.error || 'Error desconocido. Intenta recargar la página.')
@@ -34,12 +52,14 @@ function App() {
 
         setTablas(transformed)
 
+
+
       } catch (e) {
 
       }
     })()
 
-  }, [])
+  }, [excelActaulizado])
 
   return (
     <div className='w-[100%] min-h-[120vh] flex justify-center items-center flex-col bg-green-100'>
@@ -65,8 +85,8 @@ function App() {
                   {Object.keys(tablas[Tabla]).map((dato, indx2) => {
                     let hayDato = tablas[Tabla][dato].replace(/\s/g, '') != ''
 
-                    return <div key={indx2} className={`border-2 p-2 align-middle ${hayDato?'text-white':'text-red-400'}`}>
-                      {hayDato ? tablas[Tabla][dato]:'Sin dato.'}
+                    return <div key={indx2} className={`border-2 p-2 align-middle ${hayDato ? 'text-white' : 'text-red-400'}`}>
+                      {hayDato ? tablas[Tabla][dato] : 'Sin dato.'}
                     </div>
                   })}
                 </div>
