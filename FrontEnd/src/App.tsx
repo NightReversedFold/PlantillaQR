@@ -17,14 +17,20 @@ const parseFecha = (fecha: string): Date => {
 }
 
 const setElementToRed = (elment: HTMLDivElement) => {
-  elment.classList.add('text-red-400')
+  elment.classList.remove('text-green-500')
+  elment.classList.remove('border-green-500')
   elment.classList.remove('text-white')
+
+  elment.classList.add('text-red-400')
   elment.classList.add('border-red-400')
 }
 
 const setElementToGreen = (elment: HTMLDivElement) => {
-  elment.classList.add('text-green-500')
+    elment.classList.remove('text-red-400')
+  elment.classList.remove('border-green-400')
   elment.classList.remove('text-white')
+
+  elment.classList.add('text-green-500')
   elment.classList.add('border-green-500')
 }
 
@@ -100,12 +106,15 @@ function App() {
             if (result <= 0) {
 
               acreditacion.classList.add('bg-red-500')
+              acreditacion.classList.remove('bg-green-500')
+
               acreditacion.textContent = ' '
               setElementToRed(acreditacion as HTMLDivElement)
 
             } else {
 
               acreditacion.classList.add('bg-green-500')
+              acreditacion.classList.remove('bg-red-500')
 
               acreditacion.textContent = ' '
               setElementToGreen(acreditacion as HTMLDivElement)
