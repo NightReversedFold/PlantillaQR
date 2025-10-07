@@ -26,8 +26,8 @@ const setElementToRed = (elment: HTMLDivElement) => {
 }
 
 const setElementToGreen = (elment: HTMLDivElement) => {
-    elment.classList.remove('text-red-400')
-  elment.classList.remove('border-green-400')
+  elment.classList.remove('text-red-400')
+  elment.classList.remove('border-red-400')
   elment.classList.remove('text-white')
 
   elment.classList.add('text-green-500')
