@@ -80,40 +80,43 @@ function App() {
 
     if (res) {
       res.querySelectorAll('.Value').forEach((valor, indx) => {
-        console.log('VALOOOOOOOOR',valor)
-        const result = obtenerRestaDeFechasEnDias(parseFecha(valor.textContent.trim()))
+        console.log('VALOOOOOOOOR', valor)
+        if (valor.textContent) {
+          const result = obtenerRestaDeFechasEnDias(parseFecha(valor.textContent.trim()))
 
-        if (result <= 4) {
-          setElementToRed(valor as HTMLDivElement)
+          if (result <= 4) {
+            setElementToRed(valor as HTMLDivElement)
 
-          if (header) {
-            setElementToRed(header)
-          }
-
-        }
-
-        const acreditacionPadre = columnasExpeditor.current?.['Acreditado']
-
-        const acreditacion = acreditacionPadre?.querySelector(`.Acreditado_${indx}`)
-
-        console.log('ACREDITACIOOOOOON',acreditacion)
-        if (acreditacion) {
-          if (result <= 0) {
-
-            acreditacion.classList.add('bg-red-500')
-            acreditacion.textContent = ' '
-            setElementToRed(acreditacion as HTMLDivElement)
-
-          } else {
-
-            acreditacion.classList.add('bg-green-500')
-
-            acreditacion.textContent = ' '
-            setElementToGreen(acreditacion as HTMLDivElement)
-
+            if (header) {
+              setElementToRed(header)
+            }
 
           }
+
+          const acreditacionPadre = columnasExpeditor.current?.['Acreditado']
+
+          const acreditacion = acreditacionPadre?.querySelector(`.Acreditado_${indx}`)
+
+          console.log('ACREDITACIOOOOOON', acreditacion)
+          if (acreditacion) {
+            if (result <= 0) {
+
+              acreditacion.classList.add('bg-red-500')
+              acreditacion.textContent = ' '
+              setElementToRed(acreditacion as HTMLDivElement)
+
+            } else {
+
+              acreditacion.classList.add('bg-green-500')
+
+              acreditacion.textContent = ' '
+              setElementToGreen(acreditacion as HTMLDivElement)
+
+
+            }
+          }
         }
+
       });
     }
 
@@ -123,15 +126,18 @@ function App() {
     const header3 = res3?.querySelector<HTMLDivElement>('.Header')
 
     if (fecha3) {
-      const result = obtenerRestaDeFechasEnDias(parseFecha(fecha3.textContent.trim()))
-      console.log(result, 'CIRCULACION')
+      if (fecha3.textContent) {
+        const result = obtenerRestaDeFechasEnDias(parseFecha(fecha3.textContent.trim()))
+        console.log(result, 'CIRCULACION')
 
-      if (result <= 4) {
-        if (header3) {
-          setElementToRed(header3)
-          setElementToRed(fecha3)
+        if (result <= 4) {
+          if (header3) {
+            setElementToRed(header3)
+            setElementToRed(fecha3)
+          }
         }
       }
+
     }
 
     const res4 = columnasExpeditor.current?.['Fecha Revision Tecnica']
@@ -139,15 +145,18 @@ function App() {
     const header4 = res4?.querySelector<HTMLDivElement>('.Header')
 
     if (fecha4) {
-      const result = obtenerRestaDeFechasEnDias(parseFecha(fecha4.textContent.trim()))
-      console.log(result, 'REVISION TECNICA')
+      if (fecha4.textContent) {
+        const result = obtenerRestaDeFechasEnDias(parseFecha(fecha4.textContent.trim()))
+        console.log(result, 'REVISION TECNICA')
 
-      if (result <= 4) {
-        if (header4) {
-          setElementToRed(header4)
-          setElementToRed(fecha4)
+        if (result <= 4) {
+          if (header4) {
+            setElementToRed(header4)
+            setElementToRed(fecha4)
+          }
         }
       }
+
     }
 
     const proxMantencion = columnasTaller.current?.['PROXIMA MANTENCION (KMS/HRS)']
@@ -158,18 +167,21 @@ function App() {
 
     console.log(kilometraje, valorKilometraje, proxMantencion)
     if (fechaProxMantencion && valorKilometraje) {
-      const result = (+fechaProxMantencion.textContent.replace(/,/g, '') - +valorKilometraje.textContent.replace(/,/g, ''))
-      console.log(result, 'PROXIMA MANTENCION')
-      if (result <= 500) {
-        const headerProxMantencion = proxMantencion?.querySelector<HTMLDivElement>('.Header')
+      if (fechaProxMantencion.textContent && valorKilometraje.textContent) {
+        const result = (+fechaProxMantencion.textContent.replace(/,/g, '') - +valorKilometraje.textContent.replace(/,/g, ''))
+        console.log(result, 'PROXIMA MANTENCION')
+        if (result <= 500) {
+          const headerProxMantencion = proxMantencion?.querySelector<HTMLDivElement>('.Header')
 
-        if (headerProxMantencion) {
-          setElementToRed(headerProxMantencion)
+          if (headerProxMantencion) {
+            setElementToRed(headerProxMantencion)
+          }
+
+          setElementToRed(fechaProxMantencion)
+
         }
-
-        setElementToRed(fechaProxMantencion)
-
       }
+
     }
 
 

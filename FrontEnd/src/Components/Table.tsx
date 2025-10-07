@@ -39,7 +39,7 @@ export default forwardRef<columnsType, tablaProps>(({ formato, objetoType, clamp
 
         </div>
 
-    </div> : objetoType === 'string' ? <p className='text-center text-red-500 text-3xl'> {tabla} </p> : <p className='text-center text-red-500 text-3xl'>Error desconocido. Intenta recargar la página.</p>
+    </div> : objetoType === 'string' ? <p className='text-center text-red-500 text-3xl'> {JSON.stringify(tabla)} </p> : <p className='text-center text-red-500 text-3xl'>Error desconocido. Intenta recargar la página.</p>
 
 }
 )
