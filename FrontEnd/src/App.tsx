@@ -1,27 +1,64 @@
 import { useEffect, useRef, useState } from 'react'
 import './styles.css'
 
+import exclamation from './assets/Exclamation.png';
+
 import { io, Socket } from "socket.io-client";
+import Table from './Components/Table';
+
+import type { columnsType } from './Components/Table';
+
+
+const parseFecha = (fecha: string): Date => {
+  // mes, dia, año --> año, mes, dia
+
+  const [mes, dia, anio] = fecha.split('/').map(Number)
+
+  return new Date(anio, mes - 1, dia)
+}
+
+const setElementToRed = (elment: HTMLDivElement) => {
+  elment.classList.add('text-red-400')
+  elment.classList.remove('text-white')
+  elment.classList.add('border-red-400')
+}
+
+const setElementToGreen = (elment: HTMLDivElement) => {
+  elment.classList.add('text-green-500')
+  elment.classList.remove('text-white')
+  elment.classList.add('border-green-500')
+}
+
+
+const obtenerRestaDeFechasEnDias = (fecha: Date) => {
+  console.log(fecha)
+
+  const today = new Date()
+
+  const result = (fecha.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+
+  return result
+}
 
 function App() {
   const [tablas, setTablas] = useState<{
-    [key: string]: {
-      [key: string]: string
-    }
+    [key: string]: Record<string, string[]>
+
   } | null>(null)
 
   const [error, setError] = useState<string | null>(null)
   const socket = useRef<Socket | null>(null)
 
   const [excelActaulizado, setActualizarExcel] = useState<boolean>(false)
+  const [clampTable, setClampTable] = useState<boolean>(false)
+
+  const columnasExpeditor = useRef<columnsType>({})
+  const columnasTaller = useRef<columnsType>({})
+  const columnasChecklist = useRef<columnsType>({})
 
   const path = window.location.pathname;
   const partes = path.split('/');
   const patente = partes[2] ?? 'vacio';
-
-  console.log(patente)
-
-  console.log(import.meta.env.VITE_BACKEND_URL)
 
   useEffect(() => {
 
@@ -37,12 +74,114 @@ function App() {
   }, [])
 
   useEffect(() => {
-    console.log(excelActaulizado);
+
+    const res = columnasExpeditor.current?.['Fecha Expiración']
+    const header = res?.querySelector<HTMLDivElement>('.Header')
+
+    if (res) {
+      res.querySelectorAll('.Value').forEach((valor, indx) => {
+        console.log('VALOOOOOOOOR',valor)
+        const result = obtenerRestaDeFechasEnDias(parseFecha(valor.textContent.trim()))
+
+        if (result <= 4) {
+          setElementToRed(valor as HTMLDivElement)
+
+          if (header) {
+            setElementToRed(header)
+          }
+
+        }
+
+        const acreditacionPadre = columnasExpeditor.current?.['Acreditado']
+
+        const acreditacion = acreditacionPadre?.querySelector(`.Acreditado_${indx}`)
+
+        console.log('ACREDITACIOOOOOON',acreditacion)
+        if (acreditacion) {
+          if (result <= 0) {
+
+            acreditacion.classList.add('bg-red-500')
+            acreditacion.textContent = ' '
+            setElementToRed(acreditacion as HTMLDivElement)
+
+          } else {
+
+            acreditacion.classList.add('bg-green-500')
+
+            acreditacion.textContent = ' '
+            setElementToGreen(acreditacion as HTMLDivElement)
+
+
+          }
+        }
+      });
+    }
+
+
+    const res3 = columnasExpeditor.current?.['Fecha Permiso Circulacion']
+    const fecha3 = res3?.querySelector<HTMLDivElement>('.Value')
+    const header3 = res3?.querySelector<HTMLDivElement>('.Header')
+
+    if (fecha3) {
+      const result = obtenerRestaDeFechasEnDias(parseFecha(fecha3.textContent.trim()))
+      console.log(result, 'CIRCULACION')
+
+      if (result <= 4) {
+        if (header3) {
+          setElementToRed(header3)
+          setElementToRed(fecha3)
+        }
+      }
+    }
+
+    const res4 = columnasExpeditor.current?.['Fecha Revision Tecnica']
+    const fecha4 = res4?.querySelector<HTMLDivElement>('.Value')
+    const header4 = res4?.querySelector<HTMLDivElement>('.Header')
+
+    if (fecha4) {
+      const result = obtenerRestaDeFechasEnDias(parseFecha(fecha4.textContent.trim()))
+      console.log(result, 'REVISION TECNICA')
+
+      if (result <= 4) {
+        if (header4) {
+          setElementToRed(header4)
+          setElementToRed(fecha4)
+        }
+      }
+    }
+
+    const proxMantencion = columnasTaller.current?.['PROXIMA MANTENCION (KMS/HRS)']
+    const fechaProxMantencion = proxMantencion?.querySelector<HTMLDivElement>('.Value')
+
+    const kilometraje = columnasChecklist.current?.['Kilometraje']
+    const valorKilometraje = kilometraje?.querySelector<HTMLDivElement>('.Value')
+
+    console.log(kilometraje, valorKilometraje, proxMantencion)
+    if (fechaProxMantencion && valorKilometraje) {
+      const result = (+fechaProxMantencion.textContent.replace(/,/g, '') - +valorKilometraje.textContent.replace(/,/g, ''))
+      console.log(result, 'PROXIMA MANTENCION')
+      if (result <= 500) {
+        const headerProxMantencion = proxMantencion?.querySelector<HTMLDivElement>('.Header')
+
+        if (headerProxMantencion) {
+          setElementToRed(headerProxMantencion)
+        }
+
+        setElementToRed(fechaProxMantencion)
+
+      }
+    }
+
+
+  }, [tablas])
+
+  useEffect(() => {
 
     (async () => {
       try {
         const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/${patente}`)
         const transformed = await data.json()
+
 
         if (!data.ok) {
           setError(transformed.error || 'Error desconocido. Intenta recargar la página.')
@@ -50,6 +189,7 @@ function App() {
           return
         }
 
+        console.log(transformed)
         setTablas(transformed)
 
       } catch (e) {
@@ -59,47 +199,44 @@ function App() {
 
   }, [excelActaulizado])
 
-  return (
-    <div className='w-[100%] min-h-[120vh] flex justify-center items-center flex-col bg-green-100'>
-      <h1 className='text-3xl sm:text-5xl text-center mb-5'>Información del vehiculo</h1>
 
-      <div className='w-[90%] h-[85%]  bg-sky-900 text-white p-5 flex  flex-col items-center justify-center gap-y-10'>
+  return (
+    <div className='w-[100%]  min-h-[120vh] flex justify-center items-center flex-col bg-[#1f1f21] text-white'>
+
+      <div onClick={() => { setClampTable(!clampTable) }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable ? 'amplias' : 'agrandadas'}</div>
+
+      <h1 className='text-4xl sm:text-5xl text-center mb-5'>Información del vehiculo</h1>
+
+      <div className='w-[90%] h-[85%]  border-1 text-white p-5 flex  flex-col items-center justify-center gap-y-10'>
 
         {
 
           tablas ?
+            <>
+              <h2 className='text-2xl '>Expeditor</h2>
+              <Table ref={columnasExpeditor} formato={!clampTable ? 'grid-cols-[auto_auto_auto_auto_auto_minmax(150px,auto)_auto]' : 'grid-cols-[auto_auto_auto_auto_auto_auto_auto]'} objetoType={typeof tablas.Expeditor as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Expeditor} />
+              <h2 className='text-2xl '>Taller</h2>
+              <Table ref={columnasTaller} formato={!clampTable ? 'grid-cols-[auto_auto_auto_auto]' : 'grid-cols-4'} objetoType={typeof tablas.Taller as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Taller} />
 
-            Object.keys(tablas).map((Tabla: string, indx) => {
-              return typeof tablas[Tabla] == 'object' ? <div className='w-full '>
-                <h2 className='text-2xl text-center w-full mb-5'>{Tabla}</h2>
-                <div key={indx} style={{ fontSize: 'clamp(7px, 2vw, 18px)' }} className={` break-words text-center grid ${Tabla == 'Expeditor' ? 'grid-cols-5' : Tabla == 'Taller' ? 'grid-cols-4' : null} grid-rows-1 border-2 p-2`}>
+              <div className='flex flex-row'>
+                <h2 className='text-2xl '>Checklist</h2>
+              </div>
 
-                  {Object.keys(tablas[Tabla]).map((dato, indx2) => {
-                    return <div key={indx2} className='border-2 p-2 align-middle bg-gray-400'>
-                      {dato.replace(/\s/g, '') == '' ? 'Sin dato.' : dato}
-                    </div>
-                  })}
-
-                  {Object.keys(tablas[Tabla]).map((dato, indx2) => {
-                    let hayDato = tablas[Tabla][dato].replace(/\s/g, '') != ''
-
-                    return <div key={indx2} className={`border-2 p-2 align-middle ${hayDato ? 'text-white' : 'text-red-400'}`}>
-                      {hayDato ? tablas[Tabla][dato] : 'Sin dato.'}
-                    </div>
-                  })}
+              <div className='w-full flex justify-center text-center h-[10%] '>
+                <div className='bg-amber- w-[80%] bg-slate-500 align-middle  hover:bg-slate-700 border-1'>
+                  <a className='' target='_blank' href="https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header">Checklist control de vehículo</a>
                 </div>
-              </div> : typeof tablas[Tabla] == 'string' ? <p className='text-center text-red-500 text-3xl'>{tablas[Tabla]}</p > : <p className='text-center text-red-500 text-3xl'>'Error desconocido. Intenta recargar la página.'</p>
+              </div>
 
-            }) : error ? <p className='text-center text-red-500 text-3xl'>
+              <Table ref={columnasChecklist} formato={!clampTable ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(320px,auto)_minmax(150px,auto)]' : 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(300px,auto)_minmax(250px,auto)]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist} />
+
+            </>
+
+            : error ? <p className='text-center text-red-500 text-3xl'>
               {error}
             </p> : 'Cargando datos...'
         }
 
-        <div className='w-full flex justify-center text-center hover:bg-slate-700  h-[10%] '>
-          <div className='bg-amber- w-[80%] bg-slate-500 align-middle '>
-            <a className='' target='_blank' href="https://docs.google.com/forms/d/e/1FAIpQLSdT5pZGXZr9oN59QETtl6DlRNxviv3vo09M2B3RLgy0auycRg/viewform?usp=sharing&ouid=114554944640707248727">Checklist control de vehículo</a>
-          </div>
-        </div>
       </div>
 
     </div>
