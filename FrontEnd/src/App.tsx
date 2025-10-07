@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './styles.css'
 
-import exclamation from './assets/Exclamation.png';
-
 import { io, Socket } from "socket.io-client";
 import Table from './Components/Table';
 
