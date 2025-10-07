@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './styles.css'
 
+
 import { io, Socket } from "socket.io-client";
 import Table from './Components/Table';
 
@@ -78,7 +79,6 @@ function App() {
 
     if (res) {
       res.querySelectorAll('.Value').forEach((valor, indx) => {
-        console.log('VALOOOOOOOOR', valor)
         if (valor.textContent) {
           const result = obtenerRestaDeFechasEnDias(parseFecha(valor.textContent.trim()))
 
@@ -120,42 +120,40 @@ function App() {
 
 
     const res3 = columnasExpeditor.current?.['Fecha Permiso Circulacion']
-    const fecha3 = res3?.querySelector<HTMLDivElement>('.Value')
     const header3 = res3?.querySelector<HTMLDivElement>('.Header')
 
-    if (fecha3) {
-      if (fecha3.textContent) {
-        const result = obtenerRestaDeFechasEnDias(parseFecha(fecha3.textContent.trim()))
-        console.log(result, 'CIRCULACION')
+    res3?.querySelectorAll('.Value').forEach((valor) => {
+      if (valor.textContent) {
+        const result = obtenerRestaDeFechasEnDias(parseFecha(valor.textContent.trim()))
 
         if (result <= 4) {
+          setElementToRed(valor as HTMLDivElement)
+
           if (header3) {
             setElementToRed(header3)
-            setElementToRed(fecha3)
           }
+
         }
       }
-
-    }
+    })
 
     const res4 = columnasExpeditor.current?.['Fecha Revision Tecnica']
-    const fecha4 = res4?.querySelector<HTMLDivElement>('.Value')
     const header4 = res4?.querySelector<HTMLDivElement>('.Header')
 
-    if (fecha4) {
-      if (fecha4.textContent) {
-        const result = obtenerRestaDeFechasEnDias(parseFecha(fecha4.textContent.trim()))
-        console.log(result, 'REVISION TECNICA')
+    res4?.querySelectorAll('.Value').forEach((valor) => {
+      if (valor.textContent) {
+        const result = obtenerRestaDeFechasEnDias(parseFecha(valor.textContent.trim()))
 
         if (result <= 4) {
+          setElementToRed(valor as HTMLDivElement)
+
           if (header4) {
             setElementToRed(header4)
-            setElementToRed(fecha4)
           }
+
         }
       }
-
-    }
+    })
 
     const proxMantencion = columnasTaller.current?.['PROXIMA MANTENCION (KMS/HRS)']
     const fechaProxMantencion = proxMantencion?.querySelector<HTMLDivElement>('.Value')
