@@ -95,6 +95,12 @@ function App() {
               setElementToRed(header)
             }
 
+          } else {
+            valor?.classList.remove('text-red-400')
+            valor?.classList.remove('border-red-400')
+
+            header?.classList.remove('text-red-400')
+            header?.classList.remove('border-red-400')
           }
 
           const acreditacionPadre = columnasExpeditor.current?.['Acreditado']
@@ -142,6 +148,12 @@ function App() {
             setElementToRed(header3)
           }
 
+        } else {
+          valor?.classList.remove('text-red-400')
+          valor?.classList.remove('border-red-400')
+
+          header3?.classList.remove('text-red-400')
+          header3?.classList.remove('border-red-400')
         }
       }
     })
@@ -160,6 +172,12 @@ function App() {
             setElementToRed(header4)
           }
 
+        } else {
+          valor?.classList.remove('text-red-400')
+          valor?.classList.remove('border-red-400')
+
+          header4?.classList.remove('text-red-400')
+          header4?.classList.remove('border-red-400')
         }
       }
     })
@@ -175,8 +193,9 @@ function App() {
       if (fechaProxMantencion.textContent && valorKilometraje.textContent) {
         const result = (+fechaProxMantencion.textContent.replace(/,/g, '') - +valorKilometraje.textContent.replace(/,/g, ''))
         console.log(result, 'PROXIMA MANTENCION')
+        const headerProxMantencion = proxMantencion?.querySelector<HTMLDivElement>('.Header')
+
         if (result <= 500) {
-          const headerProxMantencion = proxMantencion?.querySelector<HTMLDivElement>('.Header')
 
           if (headerProxMantencion) {
             setElementToRed(headerProxMantencion)
@@ -184,6 +203,13 @@ function App() {
 
           setElementToRed(fechaProxMantencion)
 
+        }else{
+            fechaProxMantencion?.classList.remove('text-red-400')
+            fechaProxMantencion?.classList.remove('border-red-400')
+            
+            headerProxMantencion?.classList.remove('text-red-400')
+            headerProxMantencion?.classList.remove('border-red-400')
+          
         }
       }
 
