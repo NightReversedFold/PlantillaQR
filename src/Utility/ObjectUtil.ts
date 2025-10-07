@@ -1,15 +1,12 @@
 
 function mantenerDatosObjeto<T extends Record<string, any>>(obj: T, claves: string[]): Partial<T> {
-    return Object.keys(obj).reduce<{
-        [clave: string]: string
-    }>((acc, currentValue) => {
-        if (claves.includes(currentValue)) {
-            acc[currentValue] = obj[currentValue]
+    const newObj = {}
 
-        }
-        return acc
+    claves.forEach((dato) => {
+        newObj[dato] = obj[dato] || ''
+    })
 
-    }, {}) as Partial<T>
+    return newObj
 }
 
-export {mantenerDatosObjeto}
+export { mantenerDatosObjeto }

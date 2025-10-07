@@ -6,6 +6,7 @@ import { Request, Response } from 'express';
 
 import tablaExpeditor from './Utility/ObtenerTablaExpeditor'
 import obtenerTablaDePatenteDeTallerMecanico from './Utility/ObtenerTablaTallerMecanico';
+import obtenerTablaDeUltimaInspeccion from './Utility/ObtenerTablaUltimaInspeccion';
 
 import { Server } from "socket.io";
 
@@ -24,18 +25,20 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
 
     let arrayExpeditor: string[] | string
     let arrayTaller: string[] | string
+    let arrayChecklist: string[] | string
 
     try {
         let results = await Promise.allSettled([
             obtenerTablaDePatenteDeTallerMecanico(patente),
-            tablaExpeditor(patente)
+            tablaExpeditor(patente),
+            obtenerTablaDeUltimaInspeccion(patente)
         ])
 
-        console.log(results, 'lol que mal')
 
-        const [resExpeditor, resTaller]: any = results
+        const [resExpeditor, resTaller,ultimoChecklist]: any = results
         arrayTaller = resExpeditor.status == 'fulfilled' ? resExpeditor.value : resExpeditor.reason?.message && resExpeditor.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos del taller.` : `No se pudieron obtener los datos de la patente en la base de datos del taller: Error desconocido: ${String(resExpeditor.reason)}`
         arrayExpeditor = resTaller.status == 'fulfilled' ? resTaller.value : resTaller.reason?.message && resTaller.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos de mantención.` : `No se pudieron obtener los datos de la patente en la base de datos de mantención: Error desconocido: Error desconocido: ${String(resTaller.reason)}`
+        arrayChecklist = ultimoChecklist.status == 'fulfilled' ? ultimoChecklist.value : ultimoChecklist.reason?.message && ultimoChecklist.reason.message.includes('Cannot read properties of') ? `No se encontró el ultimo checklist de la patente.` : `No se pudieron obtener los datos de la patente en la base de datos del checklist: Error desconocido: Error desconocido: ${String(ultimoChecklist.reason)}`
 
         console.log(results)
 
@@ -49,7 +52,8 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
 
         res.json({
             Taller: arrayTaller,
-            Expeditor: arrayExpeditor
+            Expeditor: arrayExpeditor,
+            Checklist: arrayChecklist
         })
     }
     catch (e) {
