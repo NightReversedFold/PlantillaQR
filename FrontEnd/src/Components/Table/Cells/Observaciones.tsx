@@ -10,13 +10,10 @@ export default ({ dato }: celdaProps) => {
     const celda = useRef<objetoCelda | null>(null)
     const actualizacionExcel = useContext(contextoExcel)
 
-
     const [observaciones, setObservaciones] = useState(typeof dato?.trim() === 'string' && dato?.trim() != '' ? dato : 'Sin observaciones.')
 
     useEffect(() => {
-        if (dato) {
-            setObservaciones(dato)
-        }
+        setObservaciones(typeof dato?.trim() === 'string' && dato?.trim() != '' ? dato : 'Sin observaciones.')
 
         celda.current?.textColor(observaciones == 'Sin observaciones.' ? 'text-green-500' : 'text-yellow-500')
     }, [dato, actualizacionExcel])
