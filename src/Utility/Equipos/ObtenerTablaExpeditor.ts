@@ -1,5 +1,5 @@
-import read from '../Utility/ReadSheet'
-import { mantenerDatosObjeto } from './ObjectUtil'
+import read from '../ReadSheet'
+import { mantenerDatosObjeto } from '../ObjectUtil'
 
 type reduceType = Record<string, string[]>
 
@@ -22,7 +22,6 @@ async function obtenerPatenteDeFaena(patente, hoja): Promise<[string[] | undefin
 
     return [arrayExpeditorConPatente, arrayExpeditorRes[0]]
 }
-
 
 export default async function obtenerTablaDePatenteDeTablaExpeditor(patente: string): Promise<reduceType> {
     const final = { Faena: [] }
@@ -72,7 +71,7 @@ export default async function obtenerTablaDePatenteDeTablaExpeditor(patente: str
             }
         })
 
-        final['Faena'].push('DHC')
+        final['Faena'].push('DCH')
         console.log(final)
 
     } catch {

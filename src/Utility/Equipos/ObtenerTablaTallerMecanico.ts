@@ -1,5 +1,5 @@
-import read from './ReadSheet'
-import { mantenerDatosObjeto } from './ObjectUtil'
+import read from '../ReadSheet'
+import { mantenerDatosObjeto } from '../ObjectUtil'
 
 type reduceType = Record<string,string[]>
 
