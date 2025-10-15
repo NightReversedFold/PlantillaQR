@@ -13,8 +13,10 @@ export default ({ dato }: celdaProps) => {
     const [observaciones, setObservaciones] = useState(typeof dato?.trim() === 'string' && dato?.trim() != '' ? dato : 'Sin observaciones.')
 
     useEffect(() => {
+
+        celda.current?.contenido(typeof dato?.trim() === 'string' && dato?.trim() != '' ? dato : 'Sin observaciones.')
         setObservaciones(typeof dato?.trim() === 'string' && dato?.trim() != '' ? dato : 'Sin observaciones.')
-        
+
     }, [dato, actualizacionExcel])
 
     useEffect(() => {
