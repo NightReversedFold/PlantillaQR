@@ -19,7 +19,7 @@ export default ({ dato, celdasRf, fila }: celdaFechaExpiracion & celdaProps) => 
 
     useEffect(() => {
 
-        celdasRf?.current[`Acreditado_${fila}`].current?.AcreditarA(!(expirado == 2))
+        celdasRf?.current[`Acreditado_${fila}`].current?.AcreditarA(expirado)
 
     }, [expirado])
 

@@ -4,22 +4,22 @@ import Cell from "./Cell"
 import type {objetoCelda } from "./Cell"
 
 type objAcreditado = {
-    AcreditarA: (valor:boolean)=>void
+    AcreditarA: (valor:number)=>void
 }
 
 export default forwardRef<objAcreditado>((_,ref) => {
     const celda = useRef<objetoCelda | null>(null)
 
-    const [acreditado,setAcreditado] = useState(false)
+    const [acreditado,setAcreditado] = useState(1)
 
     useImperativeHandle(ref,()=>({
-        AcreditarA:(valor:boolean)=>{
+        AcreditarA:(valor:number)=>{
             setAcreditado(valor)
         }
     }))
 
     useEffect(()=>{
-        celda.current?.bgColor(`${acreditado? 'bg-green-500':'bg-red-500'}`)
+        celda.current?.bgColor(`${acreditado === 2 ? 'bg-red-500': acreditado === 1 ? 'bg-yellow-500' : 'bg-green-500'}`)
     },[acreditado])
 
     return <Cell ref={celda} />
