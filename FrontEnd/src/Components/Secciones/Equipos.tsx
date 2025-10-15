@@ -138,7 +138,7 @@ export default function Equipos() {
 
                                 <div className='w-full flex justify-center text-center h-[10%] '>
                                     <div className='bg-amber- w-[80%] bg-slate-500 align-middle  hover:bg-slate-700 border-1'>
-                                        <a className='' target='_blank' href="https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header">Checklist control de vehículo</a>
+                                        <a className='' target='_blank' href="https://docs.google.com/forms/d/e/1FAIpQLSdT5pZGXZr9oN59QETtl6DlRNxviv3vo09M2B3RLgy0auycRg/viewform?usp=header">Checklist control de vehículo</a>
                                     </div>
                                 </div>
 
