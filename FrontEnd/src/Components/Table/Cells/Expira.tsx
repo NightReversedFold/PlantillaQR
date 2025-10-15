@@ -45,6 +45,8 @@ export default ({ dato, customExpirado }: celdaProps & expiracionProps) => {
             const result = obtenerRestaDeFechasEnDias(parseFecha(dato.trim()))
             setExpirado(result <= 4 && result > 0 ? 1 : result <= 0 ? 2 : 0)
         }
+
+        celda.current?.contenido(dato)
     }, [dato, actualizacionExcel])
 
     useEffect(() => {

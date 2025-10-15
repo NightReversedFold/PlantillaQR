@@ -15,9 +15,6 @@ export type objetoCelda = {
 }
 
 export default forwardRef<objetoCelda, celdaProps>(({ dato }, ref) => {
-
-    console.log(typeof dato, dato, dato == '', 'CELDA')
-
     const [contenido, setContenido] = useState<contenido>(typeof dato === 'string' ? dato != '' ? dato.trim() : 'Sin dato.' : null)
 
     const [color, setColor] = useState<textColor>('text-white')
