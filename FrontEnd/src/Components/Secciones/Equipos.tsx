@@ -122,7 +122,7 @@ export default function Equipos() {
 
                                 <h2 className='text-2xl '>Expeditor</h2>
 
-                                <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_minmax(150px,auto)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto_auto_auto_auto_auto_auto_auto]'} objetoType={typeof tablas.Expeditor as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Expeditor} />
+                                <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_minmax(150px,auto)_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto]'} objetoType={typeof tablas.Expeditor as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Expeditor} />
 
                                 <h2 className='text-2xl '>Taller</h2>
                                 <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-4' : 'grid-cols-1'} objetoType={typeof tablas.Taller as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Taller} />

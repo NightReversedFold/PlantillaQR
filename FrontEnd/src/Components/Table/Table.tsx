@@ -6,13 +6,15 @@ import Cell from "./Cells/Cell";
 import Acreditacion from "./Cells/Acreditacion";
 import Expira from "./Cells/Expira";
 import FechaExpiracion from "./Cells/FechaExpiracion";
+import Observaciones from "./Cells/Observaciones";
 
 const Equivalencias:Record<string,any> = {
     Acreditado: Acreditacion,
     FechaPermisoCirculacion: Expira,
     FechaRevisionTecnica: Expira,
     FechaExpiración: FechaExpiracion,
-    Expiración: Expira
+    Expiración: Expira,
+    Observaciones
 }
 
 const EquivalenciasPersonal:Record<string,any> = {
