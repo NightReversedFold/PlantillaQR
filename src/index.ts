@@ -65,7 +65,7 @@ app.get('/obtenerDatos/equipos/:patente', async (req: Request<UrlPatente>, res: 
         res.status(500).json({ error: e instanceof Error ? e.message : e });
     }
 
-});
+})
 
 app.get('/obtenerDatos/imagen/:imagen', async (req: Request<UrlImagen>, res: Response) => {
     try {
