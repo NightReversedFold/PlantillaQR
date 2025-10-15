@@ -14,9 +14,12 @@ export default ({ dato }: celdaProps) => {
 
     useEffect(() => {
         setObservaciones(typeof dato?.trim() === 'string' && dato?.trim() != '' ? dato : 'Sin observaciones.')
-
-        celda.current?.textColor(observaciones == 'Sin observaciones.' ? 'text-green-500' : 'text-yellow-500')
+        
     }, [dato, actualizacionExcel])
+
+    useEffect(() => {
+        celda.current?.textColor(observaciones == 'Sin observaciones.' ? 'text-green-500' : 'text-yellow-500')
+    }, [observaciones])
 
     return <Cell dato={observaciones} ref={celda} />
 }
