@@ -4,15 +4,20 @@ import { PORT, CORS_url } from './Utility/config'
 import express from 'express';
 import { Request, Response } from 'express';
 
-import tablaExpeditor from './Utility/ObtenerTablaExpeditor'
-import obtenerTablaDePatenteDeTallerMecanico from './Utility/ObtenerTablaTallerMecanico';
-import obtenerTablaDeUltimaInspeccion from './Utility/ObtenerTablaUltimaInspeccion';
+import tablaExpeditor from './Utility/Equipos/ObtenerTablaExpeditor'
+import obtenerTablaDePatenteDeTallerMecanico from './Utility/Equipos/ObtenerTablaTallerMecanico';
+import obtenerTablaDeUltimaInspeccion from './Utility/Equipos/ObtenerTablaUltimaInspeccion';
+
+import obtenerTablaDePersonal from './Utility/Personal/obtenerTablaDePersonal'
+
+import ObtenerImagenDrive from './Utility/ObtenerImagenDrive';
 
 import { Server } from "socket.io";
 
 import cors from "cors"
 
-import { UrlPatente } from './types/Url';
+import { UrlImagen, UrlPatente } from './types/Url';
+import { UrlPersonal } from './types/Url';
 
 const app = express();
 
@@ -20,7 +25,7 @@ app.use(cors())
 
 app.use(express.json());
 
-app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response) => {
+app.get('/obtenerDatos/equipos/:patente', async (req: Request<UrlPatente>, res: Response) => {
     const patente = req.params.patente
 
     let arrayExpeditor: string[] | string
@@ -35,7 +40,7 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
         ])
 
 
-        const [resExpeditor, resTaller,ultimoChecklist]: any = results
+        const [resExpeditor, resTaller, ultimoChecklist]: any = results
         arrayTaller = resExpeditor.status == 'fulfilled' ? resExpeditor.value : resExpeditor.reason?.message && resExpeditor.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos del taller.` : `No se pudieron obtener los datos de la patente en la base de datos del taller: Error desconocido: ${String(resExpeditor.reason)}`
         arrayExpeditor = resTaller.status == 'fulfilled' ? resTaller.value : resTaller.reason?.message && resTaller.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos de mantención.` : `No se pudieron obtener los datos de la patente en la base de datos de mantención: Error desconocido: Error desconocido: ${String(resTaller.reason)}`
         arrayChecklist = ultimoChecklist.status == 'fulfilled' ? ultimoChecklist.value : ultimoChecklist.reason?.message && ultimoChecklist.reason.message.includes('Cannot read properties of') ? `No se encontró el ultimo checklist de la patente.` : `No se pudieron obtener los datos de la patente en la base de datos del checklist: Error desconocido: Error desconocido: ${String(ultimoChecklist.reason)}`
@@ -62,11 +67,65 @@ app.get('/obtenerDatos/:patente', async (req: Request<UrlPatente>, res: Response
 
 });
 
+app.get('/obtenerDatos/imagen/:imagen', async (req: Request<UrlImagen>, res: Response) => {
+    try {
+        const nombre = req.params.imagen
+
+        const [file, drive] = await ObtenerImagenDrive(nombre, '1onYq8Mk4hx8bFZDbQCujHs-RJKtIIJp6')
+
+        if (!file) return res.status(404).send("Archivo no encontrado")
+
+        const response = await drive.files.get(
+            { fileId: file.id, alt: "media" },
+            { responseType: "stream" }
+        )
+
+        res.setHeader("Content-Type", file.mimeType)
+        response.data.pipe(res)
+    } catch (err) {
+        console.log(err)
+        res.status(500).send("Error al obtener la imagen")
+    }
+
+})
+
+app.get('/obtenerDatos/personal/:rut', async (req: Request<UrlPersonal>, res: Response) => {
+    const rut = req.params.rut
+
+    let arrayPersonal: string[] | string
+
+    try {
+        let results = await Promise.allSettled([
+            obtenerTablaDePersonal(rut),
+        ])
+
+        const [resExpeditor]: any = results
+        arrayPersonal = resExpeditor.status == 'fulfilled' ? resExpeditor.value : resExpeditor.reason?.message && resExpeditor.reason.message.includes('Cannot read properties of') ? `No se encontró la patente en la base de datos del personal.` : `No se pudieron obtener los datos de la patente en la base de datos del personal: Error desconocido: ${String(resExpeditor.reason)}`
+
+        let oneGood = results.some(subArr => {
+            return subArr.status == 'fulfilled'
+        })
+
+        if (!oneGood) {
+            throw new Error(`No se pudo obtener ningun dato del personal.`)
+        }
+
+        res.json({
+            Persona: arrayPersonal,
+        })
+    }
+    catch (e) {
+        console.log(e)
+        res.status(500).json({ error: e instanceof Error ? e.message : e });
+    }
+
+});
+
 const io = new Server(app.listen(PORT, () => {
     console.log(`Servidor corriendo en PORT ${PORT}`);
 }), {
     cors: {
-        origin: CORS_url, 
+        origin: CORS_url,
         methods: ["GET", "POST"],
     },
 });
@@ -76,4 +135,11 @@ app.post('/excelActualizado', (req: Request<UrlPatente>, res: Response) => {
 
     res.status(200).json({ success: true })
 })
+
+app.post('/excelActualizadoPersonal', (req: Request<UrlPatente>, res: Response) => {
+    io.emit('actualizarExcelPersonal')
+
+    res.status(200).json({ success: true })
+})
+
 

@@ -1,6 +1,12 @@
 
-type UrlPatente = {
+export type UrlPatente = {
     patente: string;
 }
 
-export type {UrlPatente}
+export type UrlPersonal = {
+    rut: string
+}
+
+export type UrlImagen = {
+    imagen:string
+}
