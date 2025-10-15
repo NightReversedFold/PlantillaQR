@@ -2,7 +2,6 @@ import { useRef, useState,forwardRef, useImperativeHandle, useEffect } from "rea
 import Cell from "./Cell"
 
 import type {objetoCelda } from "./Cell"
-import type { celdasObj } from "../Table"
 
 type objAcreditado = {
     AcreditarA: (valor:boolean)=>void

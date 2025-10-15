@@ -7,6 +7,8 @@ import Equipos from './Components/Secciones/Equipos';
 import Personas from './Components/Secciones/Personas';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
+import './styles.css'
+
 const router = createBrowserRouter([{
   path: '/',
   errorElement: <Error />
