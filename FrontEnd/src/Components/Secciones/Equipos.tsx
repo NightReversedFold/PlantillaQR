@@ -56,7 +56,7 @@ export default function Equipos() {
 
     useEffect(() => {
 
-        socket.current = io('http://localhost:3000')
+        socket.current = io('https://plantillaqr-v2.onrender.com')
 
         socket.current.on('actualizarExcel', () => {
             setActualizarExcel(last => !last)
@@ -71,7 +71,7 @@ export default function Equipos() {
 
         (async () => {
             try {
-                const data = await fetch(`${'http://localhost:3000'}/obtenerDatos/equipos/${patente}`)
+                const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/equipos/${patente}`)
                 const transformed = await data.json()
 
 
