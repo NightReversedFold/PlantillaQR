@@ -9,7 +9,7 @@ const clavesQueMantenerTablaChecklist = [
 
 
 export default async function obtenerTablaDePatenteDeChecklist (patente: string): Promise<reduceType>  {
-    const arrayCheckListRes  = await read('registros validos', '1v9G1zT4k_g1WvO8ewHMjtRNHBKDOrDCqKIAWd3R9PnU')
+    const arrayCheckListRes  = await read('Registros validos', '1v9G1zT4k_g1WvO8ewHMjtRNHBKDOrDCqKIAWd3R9PnU')
     
     const arraysCheckListConPatente: string[][] | undefined = arrayCheckListRes!.filter(
         (subArr: string[]) => {
