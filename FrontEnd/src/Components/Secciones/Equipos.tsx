@@ -56,7 +56,7 @@ export default function Equipos() {
 
     useEffect(() => {
 
-        socket.current = io('https://plantillaqr-v2.onrender.com')
+        socket.current = io('http://localhost:3000')
 
         socket.current.on('actualizarExcel', () => {
             setActualizarExcel(last => !last)
@@ -71,7 +71,7 @@ export default function Equipos() {
 
         (async () => {
             try {
-                const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/equipos/${patente}`)
+                const data = await fetch(`${'http://localhost:3000'}/obtenerDatos/equipos/${patente}`)
                 const transformed = await data.json()
 
 
@@ -139,7 +139,6 @@ export default function Equipos() {
                                 </div>
 
                                 <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(320px,auto)_minmax(150px,auto)]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(300px,auto)_minmax(250px,auto)]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist} />
-
 
                             </>
                         </contextoExcel.Provider>

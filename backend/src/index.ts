@@ -132,7 +132,7 @@ const io = new Server(app.listen(PORT, () => {
 
 app.post('/excelActualizado', (req: Request<UrlPatente>, res: Response) => {
     io.emit('actualizarExcel')
-
+    console.log('actualizando excel')
     res.status(200).json({ success: true })
 })
 
