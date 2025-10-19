@@ -8,7 +8,8 @@ type popOutProps = {
 
 export type popOutObj = {
     cambiarContenido: (cont: contenido |React.ReactNode | null) => void
-    cambiarBg: (bg: bgColor) => void
+    cambiarBg: (bg: bgColor) => void,
+    visibilidad:(val:boolean)=>void
 }
 
 export default forwardRef<popOutObj, popOutProps>(({ info }, ref) => {
@@ -22,10 +23,14 @@ export default forwardRef<popOutObj, popOutProps>(({ info }, ref) => {
     useImperativeHandle(ref, () => ({
 
         cambiarContenido: (cont: contenido | React.ReactNode) => {
+            setVisible(true)
             setContenido(cont)
         },
         cambiarBg: (bg: bgColor) => {
             setBg(bg)
+        },
+        visibilidad:(val)=>{
+            setVisible(val)
         }
     }))
 
@@ -34,7 +39,7 @@ export default forwardRef<popOutObj, popOutProps>(({ info }, ref) => {
         setVisible(false)
     },[excelActaulizado])
 
-    return <div className={`fixed  w-[100%] h-[100%]  flex justify-center items-center rounded-2xl p-2 z-150 pointer-events-none  ${visible ? 'block' : 'hidden'}`}>
+    return <div className={`top-0 left-0 fixed  w-[100%] h-[100%]  flex justify-center items-center rounded-2xl p-2 z-150 pointer-events-none  ${visible ? 'block' : 'hidden'}`}>
         <div onClick={() => {
             setVisible(false)
         }} className={`w-full pointer-events-auto text-center y-full overflow-y-auto border-2 rounded-2xl p-2 ${bg}`}>

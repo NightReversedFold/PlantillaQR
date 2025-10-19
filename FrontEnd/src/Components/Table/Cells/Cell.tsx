@@ -63,6 +63,7 @@ export default forwardRef<objetoCelda, celdaProps>(({ dato,popOutFuncion }, ref)
 
         popOutFuncion?.(popout)
     
+        popout?.visibilidad(true)
     }} className={`Relative w-full ${bgColor} min-h-30 border-2 p-2 align-middle ${contenido === 'Sin dato.' ? 'text-red-400' : contenido !== 'Sin dato.' && contenido ? color : null}`} >
         {contenido}
     </div>

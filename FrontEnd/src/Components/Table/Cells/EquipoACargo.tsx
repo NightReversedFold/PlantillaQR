@@ -23,11 +23,11 @@ export default ({ dato }: celdaProps) => {
     useEffect(() => {
         if (equipoACargo) {
             celda.current?.contenido(equipoACargo)
-            celda.current?.bgColor('bg-green')
+           // celda.current?.bgColor('bg-green')
 
         } else {
             celda.current?.contenido('Sin equipo a cargo.')
-            celda.current?.bgColor('bg-white')
+            //celda.current?.bgColor('bg-white')
 
         }
 
