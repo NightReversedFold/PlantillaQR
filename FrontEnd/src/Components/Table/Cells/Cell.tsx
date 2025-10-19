@@ -58,7 +58,7 @@ export default forwardRef<objetoCelda, celdaProps>(({ dato,popOutFuncion }, ref)
 
     }, [dato, actualizacionExcel])
 
-    return <div onClick={(e:React.MouseEvent)=>{
+    return <div onClick={()=>{
         popout?.cambiarContenido(contenido)
 
         popOutFuncion?.(popout)
