@@ -21,7 +21,10 @@ import { UrlPersonal } from './types/Url';
 
 const app = express();
 
-app.use(cors())
+app.use(cors({
+    origin: '*',
+    methods: ["GET", "POST"],
+}))
 
 app.use(express.json());
 
@@ -71,8 +74,8 @@ app.get('/obtenerDatos/imagen/:tipo/:imagen', async (req: Request<UrlImagen>, re
     try {
         const nombre = req.params.imagen
         const tipo = req.params.tipo
-        
-        const [file, drive] = await ObtenerImagenDrive(nombre, tipo == 'equipos' ? '1onYq8Mk4hx8bFZDbQCujHs-RJKtIIJp6': '1qdDGvflU0cREkGkygNQGOZvM9sgzoms7')
+
+        const [file, drive] = await ObtenerImagenDrive(nombre, tipo == 'equipos' ? '1onYq8Mk4hx8bFZDbQCujHs-RJKtIIJp6' : '1qdDGvflU0cREkGkygNQGOZvM9sgzoms7')
 
         if (!file) return res.status(404).send("Archivo no encontrado")
 
@@ -126,7 +129,7 @@ const io = new Server(app.listen(PORT, () => {
     console.log(`Servidor corriendo en PORT ${PORT}`);
 }), {
     cors: {
-        origin: CORS_url,
+        origin: '*',
         methods: ["GET", "POST"],
     },
 });
