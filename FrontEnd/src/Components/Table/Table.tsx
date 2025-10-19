@@ -1,4 +1,4 @@
-import React, { useRef, createRef, useState, forwardRef, useImperativeHandle } from "react";
+import React, { useRef, createRef, forwardRef, useImperativeHandle } from "react";
 
 import type { celdaProps } from "./Cells/Cell";
 
