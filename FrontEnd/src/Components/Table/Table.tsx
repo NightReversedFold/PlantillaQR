@@ -1,4 +1,4 @@
-import React, { useRef, createRef, useEffect, useState } from "react";
+import React, { useRef, createRef, useState, forwardRef, useImperativeHandle } from "react";
 
 import type { celdaProps } from "./Cells/Cell";
 
@@ -7,17 +7,25 @@ import Acreditacion from "./Cells/Acreditacion";
 import Expira from "./Cells/Expira";
 import FechaExpiracion from "./Cells/FechaExpiracion";
 import Observaciones from "./Cells/Observaciones";
+import Kilometraje from "./Cells/Kilometraje";
+import ProxMant from "./Cells/ProxMant";
+import Apto from "./Cells/Apto";
+import EquipoACargo from "./Cells/EquipoACargo";
 
-const Equivalencias:Record<string,any> = {
+const Equivalencias: Record<string, any> = {
     Acreditado: Acreditacion,
     FechaPermisoCirculacion: Expira,
     FechaRevisionTecnica: Expira,
     FechaExpiración: FechaExpiracion,
     Expiración: Expira,
-    Observaciones
+    KilometrajePróximamantención: ProxMant,
+    'PROXIMAMANTENCION(KMS/HRS)': ProxMant,
+    Observaciones,
+    Kilometraje,
+    Apto
 }
 
-const EquivalenciasPersonal:Record<string,any> = {
+const EquivalenciasPersonal: Record<string, any> = {
     'FechadeTérminodeContratodelPersonal': Expira,
     'FechaExpiraciónLicenciaInterna': Expira,
     'FechadeExpiracióndeDocumentodelPersonal': Expira,
@@ -26,8 +34,8 @@ const EquivalenciasPersonal:Record<string,any> = {
     'FechadeExpiracióndeDocumentodeManejoDefensivadelPersonal': Expira,
     'FechadeExpiracióndeDocumentodeÁreasCircularesdelPersonal': Expira,
     'FechaExpiraciónLicenciaMunicipal': Expira,
-    'FechadeExpiraciónCertificadodeCompetencias': Expira
-    
+    'FechadeExpiraciónCertificadodeCompetencias': Expira,
+    'Equipoacargo':EquipoACargo
 }
 
 type tablaProps = {
@@ -39,16 +47,14 @@ type tablaProps = {
 
 export type celdasObj = Record<string, any>
 
-export default ({ formato, objetoType, clampTable, tabla }: tablaProps) => {
-    console.log(tabla, 'tablalol')
+export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTable, tabla }, ref) => {
     const [_, setCeldasTerminadas] = useState<boolean>(false)
 
-    useEffect(() => {
-        const id = setTimeout(() => { setCeldasTerminadas(true); console.log('CELDAS TERMINADAS') }, 0);
-        return () => clearTimeout(id);
-    }, [])
 
     const celdasObj = useRef<celdasObj>({})
+    const firstRow = Object.values(tabla)[0]
+
+    useImperativeHandle(ref, () => celdasObj.current)
 
     return objetoType === 'object' ? <div className='w-full flex flex-col justify-center items-center text-center'>
 
@@ -56,13 +62,13 @@ export default ({ formato, objetoType, clampTable, tabla }: tablaProps) => {
 
             {Object.keys(tabla).map((dato, indx2) => {
                 return <div key={indx2} className=" relative flex flex-col ">
-                    <div className='Header border-2 p-2 bg-[#0c0c0e] w-full min-h-45'>
+                    <div className='Header border-2 p-2 bg-[#0c0c0e] w-full min-h-55 '>
                         {dato.replace(/\s/g, '') == '' ? 'Sin dato.' : dato.trim()}
                     </div>
 
-
                     {
                         tabla[dato] instanceof Array ? tabla[dato].map((datoFila, i) => {
+                            console.log(dato,datoFila)
                             let Celda: React.ComponentType<any> | null = null
 
                             const datoWs = dato.replace(/\s+/g, '')
@@ -70,12 +76,11 @@ export default ({ formato, objetoType, clampTable, tabla }: tablaProps) => {
                             const key = `${datoWs}_${i}`
                             celdasObj.current[key] = createRef<celdaProps>()
 
-                            Celda = Equivalencias[datoWs] || EquivalenciasPersonal[datoWs]  || Cell
+                            Celda = Equivalencias[datoWs] || EquivalenciasPersonal[datoWs] || Cell
 
                             return Celda ? <Celda key={i} dato={datoFila ?? ''} ref={celdasObj.current[key]} celdasRf={celdasObj} fila={i} /> : null
 
                         }) : null
-
                     }
 
 
@@ -88,4 +93,4 @@ export default ({ formato, objetoType, clampTable, tabla }: tablaProps) => {
 
     </div> : objetoType === 'string' ? <p className='text-center text-red-500 text-3xl'> {JSON.stringify(tabla)} </p> : <p className='text-center text-red-500 text-3xl'>Error desconocido. Intenta recargar la página.</p>
 
-}
+})

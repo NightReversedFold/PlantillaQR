@@ -51,5 +51,10 @@ export default ({ dato, customExpirado }: celdaProps & expiracionProps) => {
         celda.current?.textColor(`${expirado === 2 ? 'text-red-500' : expirado === 1 ? 'text-yellow-500' : 'text-green-500'}`)
     }, [expirado])
 
-    return <Cell dato={dato} ref={celda} />
+    return <Cell popOutFuncion={(popout) => {
+        popout?.cambiarContenido(<>
+            {dato}
+            {expirado === 2 ? <p className="text-red-500">Expirado</p> : expirado === 1 ? <p className="text-yellow-500">A punto de expirar.</p> : <p className="text-green-500">Vigente.</p>}
+        </>)
+    }} dato={dato} ref={celda} />
 }

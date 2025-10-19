@@ -8,5 +8,8 @@ export type UrlPersonal = {
 }
 
 export type UrlImagen = {
+    tipo:string
+
     imagen:string
+    
 }

@@ -8,8 +8,11 @@ import { useParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
 
 import { createContext } from 'react'
-import Semaforo from '../Diseño/Semaforo'
+import { backend } from '../../utility/vars'
+import Info, { type popOutObj } from '../Diseño/info'
+
 export const contextoExcel = createContext<boolean>(false)
+export const contextoPopoutPersonal = createContext<popOutObj | null>(null)
 
 export default function Equipos() {
 
@@ -21,16 +24,19 @@ export default function Equipos() {
         [key: string]: Record<string, string[]>
 
     } | null>(null)
+    const popout = useRef<popOutObj | null>(null)
 
     const [error, setError] = useState<string | null>(null)
     const socket = useRef<Socket | null>(null)
+
+    const [imagenPersonal, setimagenPersonal] = useState<string | null>(null)
 
     const [excelActaulizado, setActualizarExcel] = useState<boolean>(false)
     const [clampTable, setClampTable] = useState<number>(1)
 
     useEffect(() => {
 
-        socket.current = io('https://plantillaqr-v2.onrender.com')
+        socket.current = io(backend)
 
         socket.current.on('actualizarExcelPersonal', () => {
             setActualizarExcel(last => !last)
@@ -42,11 +48,31 @@ export default function Equipos() {
     }, [])
 
     useEffect(() => {
+        (async () => {
+            try {
+                const data = await fetch(`${backend}/obtenerDatos/imagen/personal/${rut}.png`)
+
+                if (data.ok) {
+                    const blob = await data.blob()
+
+                    setimagenPersonal(blob ? URL.createObjectURL(blob) : null)
+
+                }
+
+            } catch (e) {
+
+            }
+
+        })()
+    }, [rut])
+
+
+    useEffect(() => {
 
         (async () => {
             try {
                 console.log(rut)
-                const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/personal/${rut}`)
+                const data = await fetch(`${backend}/obtenerDatos/personal/${rut}`)
                 const transformed = await data.json()
                 console.log(data, transformed)
 
@@ -79,7 +105,7 @@ export default function Equipos() {
 
                 <h1 className='text-4xl sm:text-5xl text-center mb-10'>Información del personal</h1>
 
-                <Semaforo />
+
             </> : null}
 
 
@@ -88,15 +114,20 @@ export default function Equipos() {
                 {
 
                     tablas ?
-                        <contextoExcel.Provider value={excelActaulizado}>
-                            <>
-                                <h2 className='text-2xl '>Expeditor</h2>
+                        <contextoPopoutPersonal.Provider value={popout.current}>
+                            <contextoExcel.Provider value={excelActaulizado}>
+                                <>
+                                    {<Info ref={popout} />}
 
-                                <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Persona as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Persona} />
+                                    {imagenPersonal ? <img src={imagenPersonal} alt="" /> : null}
 
-                            </>
-                        </contextoExcel.Provider>
+                                    <h2 className='text-4xl '>Expeditor</h2>
 
+                                    <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Persona as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Persona} />
+
+                                </>
+                            </contextoExcel.Provider>
+                        </contextoPopoutPersonal.Provider>
                         : error ? <p className='text-center text-red-500 text-3xl'>
                             {error}
                         </p> : 'Cargando datos...'

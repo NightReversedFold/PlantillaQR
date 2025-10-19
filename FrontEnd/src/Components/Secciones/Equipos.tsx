@@ -1,6 +1,6 @@
 
-import { useEffect, useRef, useState } from 'react'
-import Table from '../Table/Table'
+import React, { createRef, useEffect, useRef, useState } from 'react'
+import Table, { type celdasObj } from '../Table/Table'
 import { Socket } from 'socket.io-client'
 
 import { useParams } from 'react-router-dom'
@@ -9,9 +9,27 @@ import { io } from 'socket.io-client'
 
 import { createContext } from 'react'
 
-import Semaforo from '../Diseño/Semaforo'
+import { backend } from '../../utility/vars'
+import type { contenido } from '../Table/Cells/Cell'
+import Info, { type popOutObj } from '../../Components/Diseño/info'
+
+type tablaCIDC = Record<string, React.RefObject<celdasObj | null>>
+
+
+type tablasEstado = {
+    [key: string]: Record<string, string[]>
+
+} | null
+
+const checkListLinks = {
+    'TDXR19':'https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header',
+    'TDXL15' : 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header'
+}
 
 export const contextoExcel = createContext<boolean>(false)
+export const contextoObtenerTablas = createContext<[React.RefObject<tablaCIDC>, tablasEstado] | null>(null)
+export const contextoCeldaActualizada = createContext<[contenido, React.Dispatch<React.SetStateAction<contenido>>] | null>(null)
+export const contextoPopout = createContext<popOutObj | null>(null)
 
 export default function Equipos() {
 
@@ -21,24 +39,28 @@ export default function Equipos() {
         patente: string
     }>()
 
-    console.log()
-
-    const [tablas, setTablas] = useState<{
-        [key: string]: Record<string, string[]>
-
-    } | null>(null)
+    const [tablas, setTablas] = useState<tablasEstado | null>(null)
 
     const [error, setError] = useState<string | null>(null)
     const socket = useRef<Socket | null>(null)
 
+    const [celdaActualizada, setCeldaActualizada] = useState<contenido | null>()
+
     const [excelActaulizado, setActualizarExcel] = useState<boolean>(false)
     const [clampTable, setClampTable] = useState<number>(1)
 
+    const popout = useRef<popOutObj | null>(null)
+
+    const tablasConInstanciasDeCeldas = useRef<tablaCIDC>({
+        Taller: createRef<celdasObj>(),
+        Expeditor: createRef<celdasObj>(),
+        Checklist: createRef<celdasObj>()
+    })
 
     useEffect(() => {
         (async () => {
             try {
-                const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/imagen/${patente}.png`)
+                const data = await fetch(`${backend}/obtenerDatos/imagen/equipos/${patente}.png`)
 
                 if (data.ok) {
                     const blob = await data.blob()
@@ -52,11 +74,11 @@ export default function Equipos() {
             }
 
         })()
-    }, [])
+    }, [patente])
 
     useEffect(() => {
 
-        socket.current = io('https://plantillaqr-v2.onrender.com')
+        socket.current = io(backend)
 
         socket.current.on('actualizarExcel', () => {
             setActualizarExcel(last => !last)
@@ -67,11 +89,12 @@ export default function Equipos() {
         }
     }, [])
 
+
     useEffect(() => {
 
         (async () => {
             try {
-                const data = await fetch(`${'https://plantillaqr-v2.onrender.com'}/obtenerDatos/equipos/${patente}`)
+                const data = await fetch(`${backend}/obtenerDatos/equipos/${patente}`)
                 const transformed = await data.json()
 
 
@@ -81,16 +104,15 @@ export default function Equipos() {
                     return
                 }
 
-                console.log(transformed)
                 setTablas(transformed)
 
             } catch (e) {
-
+            
             }
         })()
 
-    }, [excelActaulizado])
 
+    }, [excelActaulizado])
 
     return (
         <div className='w-[100%] pt-10  min-h-[120vh] flex justify-center items-center flex-col bg-[#1f1f21] text-white'>
@@ -103,46 +125,53 @@ export default function Equipos() {
                         })
                     }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable == 1 ? 'Normal' : clampTable == 2 ? 'Agrandadas' : 'Columnas'}</div>
 
-                    <h1 className='text-4xl sm:text-5xl text-center mb-10'>Información del vehículo</h1>
+                    <h1 className={` text-4xl sm:text-5xl text-center mb-10`}>Información del vehículo</h1>
 
-                    <Semaforo />
                 </>
                 : null}
-
-
 
             <div className='w-[90%] h-[85%]  border-1 text-white p-5 flex  flex-col items-center justify-center gap-y-10'>
 
                 {
 
                     tablas ?
-                        <contextoExcel.Provider value={excelActaulizado}>
-                            <>
-                                {imagenEquipo ? <img src={imagenEquipo} alt="" /> : null}
+                        <contextoPopout.Provider value={popout.current}>
+                            <contextoCeldaActualizada.Provider value={[celdaActualizada, setCeldaActualizada]}>
+                                <contextoObtenerTablas.Provider value={[tablasConInstanciasDeCeldas, tablas]}>
+                                    <contextoExcel.Provider value={excelActaulizado}>
+                                        <>
+                                            {<Info ref={popout} />}
 
-                                <h2 className='text-2xl '>Expeditor</h2>
+                                            {imagenEquipo ? <img src={imagenEquipo} alt="" /> : null}
 
-                                <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_minmax(150px,auto)_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto]'} objetoType={typeof tablas.Expeditor as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Expeditor} />
+                                            <h2 className='text-4xl '>Expeditor</h2>
 
-                                <h2 className='text-2xl '>Taller</h2>
-                                <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-4' : 'grid-cols-1'} objetoType={typeof tablas.Taller as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Taller} />
+                                            <Table ref={tablasConInstanciasDeCeldas.current.Expeditor} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_minmax(150px,auto)_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto]'} objetoType={typeof tablas.Expeditor as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Expeditor} />
+
+                                            <h2 className='text-4xl '>Taller</h2>
+                                            <Table ref={tablasConInstanciasDeCeldas.current.Taller} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-4' : 'grid-cols-1'} objetoType={typeof tablas.Taller as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Taller} />
+
+                                            <div className='flex flex-row'>
+                                                <h2 className='text-4xl '>Checklist</h2>
+                                            </div>
+
+                                            <div className='w-full flex justify-center text-center h-[10%] '>
+                                                <div className='bg-amber- w-[80%] bg-slate-500 align-middle  hover:bg-slate-700 border-1'>
+                                                    
+                                                    {patente && patente in checkListLinks  ? <a className='' target='_blank' href={checkListLinks[patente as 'TDXR19']}>Checklist control de vehículo</a> : null }
+                                                </div>
+                                            </div>
+
+                                            <Table ref={tablasConInstanciasDeCeldas.current.Checklist} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(320px,auto)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(300px,auto)_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist} />
 
 
-                                <div className='flex flex-row'>
-                                    <h2 className='text-2xl '>Checklist</h2>
-                                </div>
+                                        </>
+                                    </contextoExcel.Provider>
+                                </contextoObtenerTablas.Provider>
 
-                                <div className='w-full flex justify-center text-center h-[10%] '>
-                                    <div className='bg-amber- w-[80%] bg-slate-500 align-middle  hover:bg-slate-700 border-1'>
-                                        <a className='' target='_blank' href="https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header">Checklist control de vehículo</a>
-                                    </div>
-                                </div>
+                            </contextoCeldaActualizada.Provider>
 
-                                <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(320px,auto)_minmax(150px,auto)]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(300px,auto)_minmax(250px,auto)]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist} />
-
-                            </>
-                        </contextoExcel.Provider>
-
+                        </contextoPopout.Provider>
                         : error ? <p className='text-center text-red-500 text-3xl'>
                             {error}
                         </p> : 'Cargando datos...'
