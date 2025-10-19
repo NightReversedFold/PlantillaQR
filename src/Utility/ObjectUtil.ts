@@ -3,7 +3,7 @@ function mantenerDatosObjeto<T extends Record<string, any>>(obj: T, claves: stri
     const newObj = {}
 
     claves.forEach((dato) => {
-        newObj[dato] = obj[dato] || ['']
+        newObj[dato] = obj[dato || ''] || ['']
     })
 
     return newObj

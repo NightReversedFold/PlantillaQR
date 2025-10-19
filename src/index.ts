@@ -67,11 +67,12 @@ app.get('/obtenerDatos/equipos/:patente', async (req: Request<UrlPatente>, res: 
 
 })
 
-app.get('/obtenerDatos/imagen/:imagen', async (req: Request<UrlImagen>, res: Response) => {
+app.get('/obtenerDatos/imagen/:tipo/:imagen', async (req: Request<UrlImagen>, res: Response) => {
     try {
         const nombre = req.params.imagen
-
-        const [file, drive] = await ObtenerImagenDrive(nombre, '1onYq8Mk4hx8bFZDbQCujHs-RJKtIIJp6')
+        const tipo = req.params.tipo
+        
+        const [file, drive] = await ObtenerImagenDrive(nombre, tipo == 'equipos' ? '1onYq8Mk4hx8bFZDbQCujHs-RJKtIIJp6': '1qdDGvflU0cREkGkygNQGOZvM9sgzoms7')
 
         if (!file) return res.status(404).send("Archivo no encontrado")
 
