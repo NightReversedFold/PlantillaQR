@@ -48,11 +48,9 @@ type tablaProps = {
 export type celdasObj = Record<string, any>
 
 export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTable, tabla }, ref) => {
-    const [_, setCeldasTerminadas] = useState<boolean>(false)
 
 
     const celdasObj = useRef<celdasObj>({})
-    const firstRow = Object.values(tabla)[0]
 
     useImperativeHandle(ref, () => celdasObj.current)
 
