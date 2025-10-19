@@ -47,6 +47,8 @@ export default function Equipos() {
         }
     }, [])
 
+    console.log()
+
     useEffect(() => {
         (async () => {
             try {
