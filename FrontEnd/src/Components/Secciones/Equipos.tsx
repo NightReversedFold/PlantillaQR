@@ -23,7 +23,9 @@ type tablasEstado = {
 
 const checkListLinks = {
     'TDXR19':'https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header',
-    'TDXL15' : 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header'
+    'TDXL15' : 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header',
+    'TZTZ54' : 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header'
+
 }
 
 export const contextoExcel = createContext<boolean>(false)
