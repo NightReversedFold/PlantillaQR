@@ -3,7 +3,7 @@ import type { popOutObj } from "../../Diseño/info"
 
 export type celdaProps = {
     dato?: string,
-    popOutFuncion?:(fun:popOutObj | null)=>void
+    popOutFuncion?: (fun: popOutObj | null) => void
 }
 import { contextoCeldaActualizada, contextoExcel, contextoPopout } from "../../Secciones/Equipos"
 import { contextoPopoutPersonal } from "../../Secciones/Personas"
@@ -20,13 +20,15 @@ export type objetoCelda = {
     cambiarContenidoConFuncion: (callback: (ultValor: contenido) => string) => void
 }
 
-export default forwardRef<objetoCelda, celdaProps>(({ dato,popOutFuncion }, ref) => {
+export default forwardRef<objetoCelda, celdaProps>(({ dato, popOutFuncion }, ref) => {
     const [contenido, setContenido] = useState<contenido>(typeof dato === 'string' ? dato != '' ? dato.trim() : 'Sin dato.' : null)
     const actualizacionExcel = useContext(contextoExcel)
 
     const celdaActualizada = useContext(contextoCeldaActualizada)
-    const popout = useContext(contextoPopout) || useContext(contextoPopoutPersonal)
-
+    const popoutGlobal = useContext(contextoPopout)
+    const popoutPersonal = useContext(contextoPopoutPersonal)
+    const popout = popoutGlobal || popoutPersonal
+    
     const [color, setColor] = useState<textColor>('text-white')
     const [bgColor, setBgColor] = useState<bgColor | null>(null)
 
@@ -58,11 +60,11 @@ export default forwardRef<objetoCelda, celdaProps>(({ dato,popOutFuncion }, ref)
 
     }, [dato, actualizacionExcel])
 
-    return <div onClick={()=>{
+    return <div onClick={() => {
         popout?.cambiarContenido(contenido)
 
         popOutFuncion?.(popout)
-    
+
         popout?.visibilidad(true)
     }} className={`Relative w-full ${bgColor} min-h-30 border-2 p-2 align-middle ${contenido === 'Sin dato.' ? 'text-red-400' : contenido !== 'Sin dato.' && contenido ? color : null}`} >
         {contenido}
