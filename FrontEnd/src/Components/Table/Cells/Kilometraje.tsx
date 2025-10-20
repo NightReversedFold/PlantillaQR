@@ -22,17 +22,17 @@ export default ({ dato, celdasRf }: celdaProps & {
     const celdaActualizada = useContext(contextoCeldaActualizada)
 
     useEffect(() => {
-        console.log('ACTUALIZACION EXCEL', celdaActualizada)
+        console.log('ACTUALIZACION EXCEL', estado?.[0].current.Taller.current)
 
-        const proxMant: proxMantObj | null = estado?.[0].current.Taller.current?.['PROXIMAMANTENCION(KMS/HRS)_0']?.current
-        const proxMant2: proxMantObj | null = celdasRf?.current?.['KilometrajePróximamantención_0']?.current
+        const proxMant: proxMantObj | null = estado?.[0].current.Taller.current?.['PROXIMAMANTENCION(KMS/HRS)_1']?.current
+        const proxMant2: proxMantObj | null = celdasRf?.current?.['KilometrajePróximamantención_1']?.current
 
         const [km1, km2] = [proxMant?.celda?.obtenerContenido(), proxMant2?.celda?.obtenerContenido()]
 
         console.log(km1, km2)
 
         if (convertirANumero(km1) !== convertirANumero(km2)) {
-
+            console.log('KILOMETRAJES NO COINCIDEN')
             proxMant?.setProblemaT('Kilometrajes desiguales')
             proxMant2?.setProblemaT('Kilometrajes desiguales')
 

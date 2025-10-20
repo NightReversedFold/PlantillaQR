@@ -24,6 +24,7 @@ export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
 
     const [problema, setProblema] = useState<problemas>(null)
 
+    console.log(problema)
     useImperativeHandle(ref, () => ({
         comparar: (km) => {
 
@@ -34,6 +35,7 @@ export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
                     const resta = proxMantNumero - kilometraje
 
                     if (resta > 800) {
+                        console.log(resta,'SIN PROBLEMAS')
                         setProblema(null)
                         celda.current?.textColor('text-green-500')
                     } else if (resta <= 0) {
