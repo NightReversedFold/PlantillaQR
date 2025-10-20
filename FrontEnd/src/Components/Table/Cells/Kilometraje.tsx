@@ -29,8 +29,6 @@ export default ({ dato, celdasRf }: celdaProps & {
 
         const [km1, km2] = [proxMant?.celda?.obtenerContenido(), proxMant2?.celda?.obtenerContenido()]
 
-        console.log(km1, km2)
-
         if (convertirANumero(km1) !== convertirANumero(km2)) {
             console.log('KILOMETRAJES NO COINCIDEN')
             proxMant?.setProblemaT('Kilometrajes desiguales')
@@ -63,6 +61,10 @@ export default ({ dato, celdasRf }: celdaProps & {
 
             proxMant?.comparar(dato)
             proxMant2?.comparar(dato)
+        }
+
+        return ()=>{
+            proxMant?.setProblemaT('No existe kilometraje')
         }
 
     }, [celdaActualizada?.[0]])

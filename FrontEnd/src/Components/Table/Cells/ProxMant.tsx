@@ -1,11 +1,11 @@
-import { useRef, forwardRef, useImperativeHandle, useState } from "react"
+import { useRef, forwardRef, useImperativeHandle, useState, useEffect } from "react"
 import Cell from "./Cell"
 
 import type { objetoCelda } from "./Cell"
 
 import type { celdaProps } from "./Cell"
 
-type problemas = 'Kilometrajes desiguales' | 'Kilometraje expirado' | 'Kilometraje a punto de expirar' | 'Kilometraje no es un número' | null
+type problemas = 'Kilometrajes desiguales' | 'Kilometraje expirado' | 'No existe kilometraje' | 'Kilometraje a punto de expirar' | 'Kilometraje no es un número' | null
 
 export type proxMantObj = {
     comparar: (kilometraje: string | undefined | null) => void,
@@ -22,9 +22,17 @@ export const convertirANumero = (numeroAConv: string | number | undefined | null
 export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
     const celda = useRef<objetoCelda | null>(null)
 
-    const [problema, setProblema] = useState<problemas>(null)
+    const [problema, setProblema] = useState<problemas>('No existe kilometraje')
 
     console.log(problema)
+
+    useEffect(() => {
+        if (problema == 'No existe kilometraje') {
+            celda.current?.textColor('text-blue-500')
+
+        }
+    }, [problema])
+
     useImperativeHandle(ref, () => ({
         comparar: (km) => {
 
@@ -35,7 +43,6 @@ export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
                     const resta = proxMantNumero - kilometraje
 
                     if (resta > 800) {
-                        console.log(resta,'SIN PROBLEMAS')
                         setProblema(null)
                         celda.current?.textColor('text-green-500')
                     } else if (resta <= 0) {
@@ -63,11 +70,12 @@ export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
     return <Cell popOutFuncion={(popout) => {
         popout?.cambiarContenido(<>
             {dato}
-            {!problema ? <p className="text-green-500">El kilometraje está a mas de 800 kilometros de la próxima mantención</p> : 
-                problema === 'Kilometraje a punto de expirar' ? <p className="text-yellow-500">El kilometraje a menos de 800 kilómetros de la próxima mantención</p>:
-                 problema === 'Kilometraje expirado' ? <p className="text-blue-500">El kilometraje ya llegó al kilometraje de la próxima mantención.</p>:
-                 problema ==='Kilometraje no es un número' ? <p className="text-blue-500">El kilometraje no es un número.</p>:
-                 problema === 'Kilometrajes desiguales' ? <p className="text-blue-500">Kilometrajes desiguales.</p>:null
+            {!problema ? <p className="text-green-500">El kilometraje está a mas de 800 kilometros de la próxima mantención</p> :
+                problema === 'Kilometraje a punto de expirar' ? <p className="text-yellow-500">El kilometraje a menos de 800 kilómetros de la próxima mantención</p> :
+                    problema === 'Kilometraje expirado' ? <p className="text-blue-500">El kilometraje ya llegó al kilometraje de la próxima mantención.</p> :
+                        problema === 'No existe kilometraje' ? <p className="text-blue-500">No hay kilometraje con el que comparar.</p> :
+                            problema === 'Kilometraje no es un número' ? <p className="text-blue-500">El kilometraje no es un número.</p> :
+                                problema === 'Kilometrajes desiguales' ? <p className="text-blue-500">Kilometrajes desiguales.</p> : null
             }
         </>)
     }} dato={dato} ref={celda} />
