@@ -101,9 +101,9 @@ export default function Equipos() {
             {tablas ? <>
                 <div onClick={() => {
                     setClampTable((last) => {
-                        return last + 1 > 3 ? 1 : last + 1
+                        return last + 1 > 2 ? 1 : last + 1
                     })
-                }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable == 1 ? 'Normal' : clampTable == 2 ? 'Agrandadas' : 'Columnas'}</div>
+                }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable == 1 ? 'Normal' : 'Agrandadas' }</div>
 
                 <h1 className='text-4xl sm:text-5xl text-center mb-10'>Información del personal</h1>
 
@@ -125,7 +125,7 @@ export default function Equipos() {
 
                                     <h2 className='text-4xl '>Expeditor</h2>
 
-                                    <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Persona as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Persona} />
+                                    <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Persona as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Persona} />
 
                                 </>
                             </contextoExcel.Provider>

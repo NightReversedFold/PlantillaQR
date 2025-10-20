@@ -1,4 +1,4 @@
-import React, { useRef, createRef, forwardRef, useImperativeHandle } from "react";
+import React, { useRef, createRef, forwardRef, useImperativeHandle, useEffect, useState } from "react";
 
 import type { celdaProps } from "./Cells/Cell";
 
@@ -35,7 +35,7 @@ const EquivalenciasPersonal: Record<string, any> = {
     'FechadeExpiracióndeDocumentodeÁreasCircularesdelPersonal': Expira,
     'FechaExpiraciónLicenciaMunicipal': Expira,
     'FechadeExpiraciónCertificadodeCompetencias': Expira,
-    'Equipoacargo':EquipoACargo
+    'Equipoacargo': EquipoACargo
 }
 
 type tablaProps = {
@@ -49,43 +49,78 @@ export type celdasObj = Record<string, any>
 
 export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTable, tabla }, ref) => {
 
-
     const celdasObj = useRef<celdasObj>({})
+
+    const [filas, setFilas] = useState<string[][] | null>(null)
+
+    useEffect(() => {
+        if (objetoType == 'object') {
+            const newArr: string[][] = []
+
+            Object.keys(tabla).forEach((el) => {
+                newArr.push([el, ...tabla[el]])
+                //tabla[el].unshift(el)
+            })
+
+            const rows: string[][] = []
+
+            newArr.forEach((subArr) => {
+
+
+                subArr.forEach((str, indx2) => {
+                    if (!rows.hasOwnProperty(indx2)) {
+                        rows.push([])
+                    }
+                    rows[indx2].push(str)
+
+                })
+
+            })
+
+            setFilas(rows)
+        }
+    }, [tabla])
+
 
     useImperativeHandle(ref, () => celdasObj.current)
 
-    return objetoType === 'object' ? <div className='w-full flex flex-col justify-center items-center text-center'>
+    return filas ? <div className='w-full flex flex-col justify-center items-center text-center'>
 
-        <div style={clampTable == 2 ? { fontSize: 'clamp(7px, 2vw, 18px)' } : undefined} className={`overflow-auto w-full text-center grid ${formato} grid-rows-auto border-2 p-2`}>
+        <div style={clampTable == 2 ? { fontSize: 'clamp(7px, 2vw, 18px)' } : undefined} className={`overflow-auto  grid ${formato} grid-rows-auto flex flex-col w-full text-center border-2 p-2`}>
 
-            {Object.keys(tabla).map((dato, indx2) => {
-                return <div key={indx2} className=" relative flex flex-col ">
-                    <div className='Header border-2 p-2 bg-[#0c0c0e] w-full min-h-55 '>
-                        {dato.replace(/\s/g, '') == '' ? 'Sin dato.' : dato.trim()}
+            {
+                //  <div className=" relative flex flex-row ">
+                //  {
+                filas[0].map((headerStr, indx) => {
+                    return <div key={indx} className='Header border-2 p-2 bg-[#0c0c0e] w-full  '>
+                        {headerStr.replace(/\s/g, '') == '' ? 'Sin dato.' : headerStr.trim()}
                     </div>
+                })
+                //    }
+                //  </div>
+            }
+            {
 
-                    {
-                        tabla[dato] instanceof Array ? tabla[dato].map((datoFila, i) => {
-                            console.log(dato,datoFila)
+
+                filas.map((row, indx) => {
+                    if (indx != 0) {
+                        return row.map((rowStr, rowindx) => {
                             let Celda: React.ComponentType<any> | null = null
 
-                            const datoWs = dato.replace(/\s+/g, '')
+                            const datoWs = filas[0][rowindx].replace(/\s+/g, '')
 
-                            const key = `${datoWs}_${i}`
+                            const key = `${datoWs}_${indx}`
                             celdasObj.current[key] = createRef<celdaProps>()
 
                             Celda = Equivalencias[datoWs] || EquivalenciasPersonal[datoWs] || Cell
 
-                            return Celda ? <Celda key={i} dato={datoFila ?? ''} ref={celdasObj.current[key]} celdasRf={celdasObj} fila={i} /> : null
+                            return Celda ? <Celda key={rowindx} dato={rowStr ?? ''} ref={celdasObj.current[key]} celdasRf={celdasObj} fila={indx} /> : null
 
-                        }) : null
+                        })
                     }
+                })
 
-
-                </div>
-
-            })}
-
+            }
 
         </div>
 

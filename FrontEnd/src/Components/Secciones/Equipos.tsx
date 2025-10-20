@@ -22,7 +22,7 @@ type tablasEstado = {
 } | null
 
 const checkListLinks = {
-    'TDXR19':'https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header',
+    'TDXR19': 'https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header',
     'TDXL15' : 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header',
     'TZTZ54' : 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header'
 
@@ -123,9 +123,9 @@ export default function Equipos() {
                 <>
                     <div onClick={() => {
                         setClampTable((last) => {
-                            return last + 1 > 3 ? 1 : last + 1
+                            return last + 1 > 2 ? 1 : last + 1
                         })
-                    }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable == 1 ? 'Normal' : clampTable == 2 ? 'Agrandadas' : 'Columnas'}</div>
+                    }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable == 1 ? 'Normal' : 'Agrandadas'}</div>
 
                     <h1 className={` text-4xl sm:text-5xl text-center mb-10`}>Información del vehículo</h1>
 
@@ -164,7 +164,7 @@ export default function Equipos() {
                                                 </div>
                                             </div>
 
-                                            <Table ref={tablasConInstanciasDeCeldas.current.Checklist} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(320px,auto)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_minmax(300px,auto)_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist} />
+                                            <Table ref={tablasConInstanciasDeCeldas.current.Checklist} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_minmax(500px,500px)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_minmax(500px,500px)_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist} />
 
 
                                         </>
