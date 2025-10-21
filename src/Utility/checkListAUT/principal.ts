@@ -1,4 +1,3 @@
-import { Console } from "console";
 import read from "../ReadSheet";
 
 import OpenAI from "openai";
@@ -8,8 +7,6 @@ import AppendSheet from "../AppendSheet";
 import SendGmail from "../SendGmail";
 
 const client = new OpenAI({ apiKey: OPENAI_API_KEY });
-
-const botID = 'asst_UjYdR2X2udeDxxgLLXpQL1dU'
 
 export type Multiples = {
     'NIVEL DE ENERGIA *': string | null;
@@ -312,7 +309,7 @@ export default async (datos: InspeccionBody) => {
                     JSON.stringify(respuestaMala)
                 ]
 
-              //  insertarRegistroValido(newRow)
+                insertarRegistroValido(newRow)
 
                 console.log(resBotJSON)
 
