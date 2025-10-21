@@ -18,6 +18,7 @@ import cors from "cors"
 
 import { UrlImagen, UrlPatente } from './types/Url';
 import { UrlPersonal } from './types/Url';
+import principal, { type InspeccionBody } from './Utility/checkListAUT/principal';
 
 const app = express();
 
@@ -133,6 +134,16 @@ const io = new Server(app.listen(PORT, () => {
         methods: ["GET", "POST"],
     },
 });
+
+app.post('/automatizacion', async (req: Request<InspeccionBody>, res: Response) => {
+    try {
+        principal(req.body)
+    } catch (e) {
+        console.log(e)
+    }
+    console.log(req.body)
+    res.status(200).json({ success: true })
+})
 
 app.post('/excelActualizado', (req: Request<UrlPatente>, res: Response) => {
     io.emit('actualizarExcel')
