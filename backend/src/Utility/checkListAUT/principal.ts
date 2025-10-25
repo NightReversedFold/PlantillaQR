@@ -111,6 +111,7 @@ export default async (datos: InspeccionBody) => {
             const convertido = {}
 
             filaPatente[0].forEach((cabecera, indx) => {
+                console.log(fila[indx],fila,cabecera)
                 if (fila[indx]) {
                     convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
                 }
