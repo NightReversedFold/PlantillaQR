@@ -237,7 +237,7 @@ export default async (datos: InspeccionBody) => {
             messages: [
                 {
                     role: "system",
-                    content: "Tendrás la función de un inspector de vehículos. Recibirás datos de la inspección de un vehículo y del estado del conductor algo similar a este formato: Propiedad : estado; con posibles observaciones. Los datos tendrán el kilometraje y los estados generales del vehículo además de informacion del estado del conductor; y en base a esos datos quiero me des una escala de tipo Likert, y me entregues una descripción de los puntos mas importantes de un análisis de esos datos de no mas de 50-70 palabras, al igual que recomendaciones (posibles mejoras) en base a los datos y las observaciones si es que las hay, y teniendo en cuenta el kilometraje de la próxima revisión, igualmente no mas de 50-70 palabras. Ten muy en cuenta el estado del conductor. Siempre en el siguiente formato JSON:  {Escala:0,Recomendaciones:'',Descripcion:''}"
+                    content: "Tendrás la función de un inspector de vehículos. Recibirás datos de la inspección de un vehículo y del estado del conductor algo similar a este formato: Propiedad : estado; con posibles observaciones. Los datos tendrán el kilometraje y los estados generales del vehículo además de informacion del estado del conductor; y en base a esos datos quiero me des una escala de tipo Likert, y me entregues una descripción de los puntos mas importantes de un análisis de esos datos de no mas de 50-70 palabras, al igual que recomendaciones (posibles mejoras) en base a los datos y las observaciones si es que las hay, y teniendo en cuenta el kilometraje de la próxima revisión, igualmente no mas de 50-70 palabras. Ten muy en cuenta el estado del conductor y NO des recomendaciones de compra de productos ni cosas que inciten a comprar cosas, no des ningun tipo de recomendacón de comprar cosas aunque algo esté mal. Siempre en el siguiente formato JSON:  {Escala:0,Recomendaciones:'',Descripcion:''}"
                 },
                 {
                     role: "user",
@@ -273,13 +273,13 @@ export default async (datos: InspeccionBody) => {
 
                 console.log(proxMantecionT)
                 if (nuevoObjeto.Principales.Kilometraje >= nuevoObjeto.Principales["Kilometraje Próxima mantención"]) {
-                    SendGmail(`Buen dia ${filaTaller.RUT} se envía este correo para informarle que el kilometraje puesto en el checklist de la patente ${nuevoObjeto.Principales.Patente.toUpperCase()} es mayor que el kilometraje de la próxima mantención.`, filaTaller.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                    SendGmail(`Buen dia ${filaTaller.Nombre} se envía este correo para informarle que el kilometraje puesto en el checklist de la patente ${nuevoObjeto.Principales.Patente.toUpperCase()} es mayor que el kilometraje de la próxima mantención.`, filaTaller.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
                 }
 
                 const transformed = typeof proxMantecionT['PROXIMA MANTENCION (KMS/HRS)'] === 'string' ? Number(proxMantecionT['PROXIMA MANTENCION (KMS/HRS)'].replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s+/g, '').trim()) : typeof proxMantecionT['PROXIMA MANTENCION (KMS/HRS)']
 
                 if (nuevoObjeto.Principales["Kilometraje Próxima mantención"] !== transformed) {
-                    SendGmail(`Buen dia ${filaTaller.RUT} se le envía este correo para informarle que los kilometrajes de la patente ${nuevoObjeto.Principales.Patente.toUpperCase()} de la próxima mantención del checklist y de la base de datos del taller son distintos`, filaTaller.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                    SendGmail(`Buen dia ${filaTaller.Nombre} se le envía este correo para informarle que los kilometrajes de la patente ${nuevoObjeto.Principales.Patente.toUpperCase()} de la próxima mantención del checklist y de la base de datos del taller son distintos`, filaTaller.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
                 }
 
             })
@@ -314,11 +314,11 @@ export default async (datos: InspeccionBody) => {
                 console.log(resBotJSON)
 
                 if (respuestaMala || resBotJSON.Escala < 3) {
-                    SendGmail(`Buen dia ${gerente.RUT} se envía este correo para informarle que su vehículo ${nuevoObjeto.Principales.Patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${resBotJSON.Recomendaciones.trim()}\n${resBotJSON.Descripcion.trim()}`, gerente.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                    SendGmail(`Buen dia ${gerente.Nombre} se envía este correo para informarle que su vehículo ${nuevoObjeto.Principales.Patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${resBotJSON.Recomendaciones.trim()}\n${resBotJSON.Descripcion.trim()}`, gerente.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
 
                     const tallerF: any = await taller
 
-                    SendGmail(`Buen dia ${tallerF.RUT} se envía este correo para informarle que el vehículo ${nuevoObjeto.Principales.Patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${resBotJSON.Recomendaciones.trim()}\n${resBotJSON.Descripcion.trim()}`, tallerF.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                    SendGmail(`Buen dia ${tallerF.Nombre} se envía este correo para informarle que el vehículo ${nuevoObjeto.Principales.Patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${resBotJSON.Recomendaciones.trim()}\n${resBotJSON.Descripcion.trim()}`, tallerF.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
 
                 }
 

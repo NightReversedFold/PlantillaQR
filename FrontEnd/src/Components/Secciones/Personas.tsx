@@ -10,6 +10,7 @@ import { io } from 'socket.io-client'
 import { createContext } from 'react'
 import { backend } from '../../utility/vars'
 import Info, { type popOutObj } from '../Diseño/info'
+import Logo from '../Diseño/Logo'
 
 export const contextoExcel = createContext<boolean>(false)
 export const contextoPopoutPersonal = createContext<popOutObj | null>(null)
@@ -97,6 +98,7 @@ export default function Equipos() {
 
     return (
         <div className='w-[100%] pt-10 min-h-[100vh] flex justify-center items-center flex-col bg-[#1f1f21] text-white'>
+            <Logo/>
 
             {tablas ? <>
                 <div onClick={() => {

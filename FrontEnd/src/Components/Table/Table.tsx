@@ -5,7 +5,9 @@ import type { celdaProps } from "./Cells/Cell";
 import Cell from "./Cells/Cell";
 import Acreditacion from "./Cells/Acreditacion";
 import Expira from "./Cells/Expira";
-import FechaExpiracion from "./Cells/FechaExpiracion";
+import RvTecnica from "./Cells/RVTecnica";
+import PMCirculacion from "./Cells/PermisoCirculacion";
+
 import Observaciones from "./Cells/Observaciones";
 import Kilometraje from "./Cells/Kilometraje";
 import ProxMant from "./Cells/ProxMant";
@@ -14,9 +16,8 @@ import EquipoACargo from "./Cells/EquipoACargo";
 
 const Equivalencias: Record<string, any> = {
     Acreditado: Acreditacion,
-    FechaPermisoCirculacion: Expira,
-    FechaRevisionTecnica: Expira,
-    FechaExpiración: FechaExpiracion,
+    FechaRevisionTecnica: RvTecnica,
+    'FechaPermisoCirculacion': PMCirculacion,
     Expiración: Expira,
     KilometrajePróximamantención: ProxMant,
     'PROXIMAMANTENCION(KMS/HRS)': ProxMant,

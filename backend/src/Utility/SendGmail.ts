@@ -24,10 +24,9 @@ async function obtenerAccessToken() {
 export default async (msg:string,para:string,subjetc:string) => {
     const accesToken = await obtenerAccessToken()
 
-    console.log(accesToken,'ACCESTTTSDOOKEEEEEEEEN')
 
     const mensaje = [
-        "From: Automatizacion Ilogica <automatizacion@ilogica-soluciones.cl>",
+        "From: Automatizacion ConeXion Process <automatizacion@ilogica-soluciones.cl>",
         `To: ${para}`,
         `Subject: ${subjetc}`,
         "",
