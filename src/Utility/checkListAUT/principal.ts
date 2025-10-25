@@ -111,10 +111,12 @@ export default async (datos: InspeccionBody) => {
             const convertido = {}
 
             filaPatente[0].forEach((cabecera, indx) => {
-                console.log(fila[indx],fila,cabecera)
-                if (fila[indx]) {
-                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                if (cabecera !== 'CorreosProblemas') {
+                    if (fila[indx]) {
+                        convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                    }
                 }
+
 
             })
 
@@ -137,7 +139,9 @@ export default async (datos: InspeccionBody) => {
             const convertido = {}
 
             filaPatente[0].forEach((cabecera, indx) => {
-                convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                if (cabecera !== 'CorreosProblemas') {
+                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                }
             })
 
             return convertido
@@ -155,7 +159,10 @@ export default async (datos: InspeccionBody) => {
             const convertido = {}
 
             filaPatente[0].forEach((cabecera, indx) => {
-                convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                if (cabecera !== 'CorreosProblemas') {
+
+                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                }
             })
 
             return convertido
@@ -175,7 +182,10 @@ export default async (datos: InspeccionBody) => {
             const convertido = {}
 
             filaPatente[1].forEach((cabecera, indx) => {
-                convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                if (cabecera !== 'CorreosProblemas') {
+
+                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                }
             })
 
             return convertido
@@ -194,7 +204,10 @@ export default async (datos: InspeccionBody) => {
                 const convertido = {}
 
                 filaPatente[0].forEach((cabecera, indx) => {
-                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                    if (cabecera !== 'CorreosProblemas') {
+
+                        convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                    }
                 })
 
                 resolve(convertido)
