@@ -24,7 +24,7 @@ const tasks: ScheduledTask[] = []
 
 function cronCall(fecha: string, callBack: () => void) {
     tasks.push(cron.schedule(fecha, callBack, {
-        timezone: 'America/Mexico_City'
+        timezone: 'America/Santiago'
     }))
 }
 
