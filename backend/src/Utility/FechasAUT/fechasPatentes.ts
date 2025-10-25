@@ -75,7 +75,11 @@ async function expirationAdvice(fechaStr: fechaType, patente: string, cabecera: 
 
             fechaParsed.setDate(fechaParsed.getDate() - 4)
 
-            let [diaM, mesM, anioM] = fechaParsed.toLocaleString().split('/').map(Number)
+            fechaParsed.setDate(fechaParsed.getDate() - 4)
+
+            const diaM = fechaParsed.getDate()
+            const mesM = fechaParsed.getMonth() + 1
+            const anioM = fechaParsed.getFullYear()
 
             cronCall(`0 0 ${diaM} ${mesM} *`, () => {
                 if (new Date().getFullYear() === Number(anio)) {
