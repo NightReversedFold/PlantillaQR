@@ -5,7 +5,7 @@ type reduceType = Record<string, string[]>
 
 
 const clavesQueMantenerTablaExpeditor = [
-    'Patente', 'Faena','Marca','Modelo', 'Fecha aprobacion vehiculo', 'Fecha Permiso Circulacion', 'Fecha Revision Tecnica', 'Fecha Expiración'
+    'Patente', 'Faena','Marca','Modelo', 'Fecha aprobacion vehiculo', 'Fecha Permiso Circulacion', 'Fecha Revision Tecnica'
 ]
 
 async function obtenerPatenteDeFaena(patente, hoja): Promise<[string[] | undefined, string[]]> {
