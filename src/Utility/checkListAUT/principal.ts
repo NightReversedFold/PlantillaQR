@@ -111,7 +111,10 @@ export default async (datos: InspeccionBody) => {
             const convertido = {}
 
             filaPatente[0].forEach((cabecera, indx) => {
-                convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                if (!fila[indx]) {
+                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
+                }
+
             })
 
             return convertido
@@ -128,14 +131,14 @@ export default async (datos: InspeccionBody) => {
                 return str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s/g, '').trim() == String(nuevoObjeto.Principales["Inspeccionado por RUT"]).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s/g, '').trim()
             })
         })
- 
+
         if (fila) {
             const convertido = {}
 
             filaPatente[0].forEach((cabecera, indx) => {
                 convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
-            }) 
- 
+            })
+
             return convertido
         }
 
@@ -209,18 +212,18 @@ export default async (datos: InspeccionBody) => {
 
         if (!Object.keys(nuevoObjeto.Multiples).some(pregunta => {
             return pregunta.includes('*')
-        })) {return true}
+        })) { return true }
 
 
         if (Object.keys(nuevoObjeto.Multiples).some(pregunta => {
             return pregunta.includes('*') && (nuevoObjeto.Multiples[pregunta] === 'MALO' || !nuevoObjeto.Multiples[pregunta] || nuevoObjeto.Multiples[pregunta] == null || nuevoObjeto.Multiples[pregunta] == 'null')
-        })) {return true}
- 
-        return false 
+        })) { return true }
+
+        return false
     }
 
     function multiplesAText() {
-        let objetoATexto = '' 
+        let objetoATexto = ''
 
         Object.keys(nuevoObjeto.Multiples).forEach(pregunta => {
             objetoATexto = objetoATexto + `${pregunta.replace(/[\[\]]/g, "").replace('*', '').trim()} : ${nuevoObjeto.Multiples[pregunta].trim()}\n`
