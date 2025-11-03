@@ -155,7 +155,7 @@ export default async (datos: InspeccionBody) => {
     }
 
     async function obtenerInspeccionador() {
-        const inspeccionador = await newC.query(`SELECT * FROM Usuarios WHERE regexp_replace(rut, '[^0-9]', '', 'g') = $1 AND cargo in ('Adm.Contratos','Usuario','Dueño')`, [String(nuevoObjeto.Principales["Inspeccionado por RUT"]).replace(/\D/g, '')])
+        const inspeccionador = await newC.query(`SELECT * FROM Usuarios WHERE regexp_replace(rut, '[^0-9]', '', 'g') = regexp_replace($1, '[^0-9]', '', 'g') AND cargo in ('Adm.Contratos','Usuario','Dueño')`, [String(nuevoObjeto.Principales["Inspeccionado por RUT"]).replace(/\D/g, '')])
 
         if (inspeccionador && inspeccionador.rows[0]) {
             return inspeccionador.rows[0]
