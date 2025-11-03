@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { backend } from "../../utility/vars"
+import CxLogo from "../Diseño/CxLogo"
 
 export default () => {
 
@@ -15,10 +16,6 @@ export default () => {
 
     const [usuarios, setUsuarios] = useState<Record<string, string>[] | null>(null)
 
-
-    const Fila = (indice: number) => {
-        return <p></p>
-    }
 
     useEffect(() => {
         if (err) {
@@ -57,9 +54,12 @@ export default () => {
     }, [userErr])
 
     return <div className="bg-[#070707] flex flex-col items-center p-2 text-center">
+        <CxLogo />
+
         <h2 className="text-3xl mb-5">Usuarios</h2>
 
         <div className="w-full flex flex-col items-center">
+
             <h2 className="mt-5 mb-5 text-2xl">Agregar usuario</h2>
 
             {err ? <p>{err}</p> : <form className="flex flex-row gap-2" onSubmit={async (e) => {

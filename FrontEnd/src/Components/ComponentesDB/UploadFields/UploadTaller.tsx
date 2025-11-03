@@ -4,6 +4,7 @@ import UploadField from "./UploadField"
 
 import UploadButton from "./UploadButton"
 import DeleteTbBt from "./DeleteTbBt"
+import CxLogo from "../../Diseño/CxLogo"
 
 export default () => {
     const [archivos, setArchivos] = useState<Record<string, File>>({})
@@ -23,6 +24,8 @@ export default () => {
     }
 
     return <div className="bg-[#070707] h-[100vh] flex flex-col items-center justify-center p-2 text-white text-center" >
+        <CxLogo />
+
         <h2 className="text-3xl mb-5">Subir archivos</h2>
         <div className="flex flex-row bg-[#070707] items-center justify-center ">
             <div className="w-[90%]  flex flex-col justify-center items-center gap-y-5 p-3">

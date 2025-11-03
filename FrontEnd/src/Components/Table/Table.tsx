@@ -149,7 +149,7 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
                 //  {   
                 Object.keys(filas[0]).map((headerStr, indx) => {
                     if (equivalentKeys.hasOwnProperty(headerStr)) {
-                        headerStr = equivalentKeys[headerStr]
+                        headerStr = (equivalentKeys as any)[headerStr]
                     }
                     return <div key={indx} className='Header border-2 p-2 bg-[#0c0c0e] w-full  '>
                         {headerStr.replace(/\s/g, '') == '' ? 'Sin dato.' : headerStr.trim()}
@@ -168,7 +168,7 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
                             rowStr = `${dia}/${mes}/${anio}`
                         }
 
-                        const keyEquivalence = equivalentKeys.hasOwnProperty(Object.keys(filas[0])[rowindx]) ? equivalentKeys[Object.keys(filas[0])[rowindx]] : Object.keys(filas[0])[rowindx]
+                        const keyEquivalence = equivalentKeys.hasOwnProperty(Object.keys(filas[0])[rowindx]) ? (equivalentKeys as any)[Object.keys(filas[0])[rowindx]] : Object.keys(filas[0])[rowindx]
 
                         let Celda: React.ComponentType<any> | null = null
 
