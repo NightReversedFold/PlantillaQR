@@ -145,7 +145,7 @@ export default async (datos: InspeccionBody) => {
     }
 
     async function obtenerGerente() {
-        const gerente = await newC.query('SELECT * FROM Usuarios WHERE cargo = $1 AND patente = $2', ['Adm.Contratos', nuevoObjeto.Principales.Patente.toUpperCase()])
+        const gerente = await newC.query('SELECT * FROM Usuarios WHERE cargo = $1', ['Adm.Contratos'])
 
         if (gerente && gerente.rows[0]) {
             return gerente.rows[0]
@@ -180,7 +180,7 @@ export default async (datos: InspeccionBody) => {
     }
 
     async function Taller() {
-        const taller = await newC.query(`SELECT * FROM Usuarios WHERE cargo = $1 AND patente = $2`, ['Taller mecanico', nuevoObjeto.Principales.Patente.toUpperCase()])
+        const taller = await newC.query(`SELECT * FROM Usuarios WHERE cargo = $1`, ['Taller mecanico'])
 
         if (taller && taller.rows[0]) {
             return taller.rows[0]
