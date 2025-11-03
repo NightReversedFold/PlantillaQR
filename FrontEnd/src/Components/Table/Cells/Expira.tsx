@@ -19,9 +19,9 @@ type expiracionProps = {
 const parseFecha = (fecha: string): Date => {
     // mes, dia, año --> año, mes, dia
 
-    const [mes, dia, anio] = fecha.split('/').map(Number)
+    const [ dia,mes, anio] = fecha.split('/').map(Number)
 
-    return new Date(anio, mes - 1, dia)
+    return new Date(anio,mes,dia) //Date(anio, mes - 1, dia)
 }
 
 const obtenerRestaDeFechasEnDias = (fecha: Date) => {
@@ -53,7 +53,7 @@ export default ({ dato, customExpirado }: celdaProps & expiracionProps) => {
 
     return <Cell popOutFuncion={(popout) => {
         popout?.cambiarContenido(<>
-            {dato}
+            {celda.current?.obtenerContenido()}
             {expirado === 2 ? <p className="text-red-500">Expirado</p> : expirado === 1 ? <p className="text-yellow-500">A punto de expirar.</p> : <p className="text-green-500">Vigente.</p>}
         </>)
     }} dato={dato} ref={celda} />

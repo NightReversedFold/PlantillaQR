@@ -13,7 +13,6 @@ export default ({ dato }: celdaProps) => {
     const [apto, setApto] = useState(false)
 
     useEffect(() => {
-        console.log(dato)
         setApto((dato?.toLowerCase() == 'false'))
     }, [dato, actualizacionExcel])
 

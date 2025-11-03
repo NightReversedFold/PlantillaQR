@@ -11,21 +11,21 @@ import type { celdasObj } from "../Table"
 
 import { convertirANumero } from "./ProxMant"
 
-import { contextoCeldaActualizada, contextoObtenerTablas } from "../../Secciones/Equipos"
+import { contextoObtenerTablas } from "../../Secciones/Equipos"
+import { contextoExcel } from "../../Secciones/Personas"
 
 export default ({ dato, celdasRf }: celdaProps & {
     celdasRf?: celdasObj,
 }) => {
     const celda = useRef<objetoCelda | null>(null)
     const estado = useContext(contextoObtenerTablas)
-
-    const celdaActualizada = useContext(contextoCeldaActualizada)
+    const actualizacionExcel = useContext(contextoExcel)
 
     useEffect(() => {
-        console.log('ACTUALIZACION EXCEL', estado?.[0].current.Taller.current)
+        console.log('ACTUALIZACION EXCEL', estado?.[0].current.Taller.current, celdasRf?.current, celdasRf?.current?.['KilometrajePróximamantención_0'])
 
-        const proxMant: proxMantObj | null = estado?.[0].current.Taller.current?.['PROXIMAMANTENCION(KMS/HRS)_1']?.current
-        const proxMant2: proxMantObj | null = celdasRf?.current?.['KilometrajePróximamantención_1']?.current
+        const proxMant: proxMantObj | null = estado?.[0].current.Taller.current?.['ProximaMantencion_0']?.current
+        const proxMant2: proxMantObj | null = celdasRf?.current?.['KilometrajePróximamantención_0']?.current
 
         const [km1, km2] = [proxMant?.celda?.obtenerContenido(), proxMant2?.celda?.obtenerContenido()]
 
@@ -51,8 +51,8 @@ export default ({ dato, celdasRf }: celdaProps & {
         } else {
 
             proxMant2?.celda?.cambiarContenidoConFuncion((last) => {
-            //   if (last?.includes('(No coincide con taller)')) return last
-            
+                //   if (last?.includes('(No coincide con taller)')) return last
+
                 return `${last?.match(/\d+/g)}`
             })
             proxMant?.celda?.cambiarContenidoConFuncion((last) => {
@@ -63,11 +63,12 @@ export default ({ dato, celdasRf }: celdaProps & {
             proxMant2?.comparar(dato)
         }
 
-        return ()=>{
+        return () => {
             proxMant?.setProblemaT('No existe kilometraje')
+            proxMant2?.setProblemaT('No existe kilometraje')
         }
 
-    }, [celdaActualizada?.[0]])
+    }, [estado,actualizacionExcel])
 
     return <Cell dato={dato} ref={celda} />
 }

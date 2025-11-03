@@ -17,8 +17,6 @@ export const convertirANumero = (numeroAConv: string | number | undefined | null
     return Number(typeof numeroAConv === 'string' ? numeroAConv.replace(/,/g, '').match(/\d+/g) : numeroAConv)
 }
 
-
-
 export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
     const celda = useRef<objetoCelda | null>(null)
 
@@ -27,10 +25,19 @@ export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
     console.log(problema)
 
     useEffect(() => {
-        if (problema == 'No existe kilometraje') {
+        console.log(problema)
+        if (problema === 'No existe kilometraje') {
+
             celda.current?.textColor('text-blue-500')
 
+            return
         }
+
+        if (problema === null) {
+            celda.current?.textColor('text-green-500')
+            return
+        }   
+
     }, [problema])
 
     useImperativeHandle(ref, () => ({
@@ -43,8 +50,10 @@ export default forwardRef<proxMantObj, celdaProps>(({ dato }, ref) => {
                     const resta = proxMantNumero - kilometraje
 
                     if (resta > 800) {
+
                         setProblema(null)
-                        celda.current?.textColor('text-green-500')
+                        console.log('PROXIMA MANTENCIOOOOON', dato)
+
                     } else if (resta <= 0) {
                         setProblema('Kilometraje expirado')
                         celda.current?.textColor('text-red-500')

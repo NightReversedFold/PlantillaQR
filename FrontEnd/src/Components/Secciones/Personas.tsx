@@ -11,6 +11,9 @@ import { createContext } from 'react'
 import { backend } from '../../utility/vars'
 import Info, { type popOutObj } from '../Diseño/info'
 import Logo from '../Diseño/Logo'
+import SideBar from '../Diseño/SideBar'
+import Options from '../../assets/Options.png'
+import Foter from '../Diseño/Foter'
 
 export const contextoExcel = createContext<boolean>(false)
 export const contextoPopoutPersonal = createContext<popOutObj | null>(null)
@@ -26,6 +29,7 @@ export default function Equipos() {
 
     } | null>(null)
     const popout = useRef<popOutObj | null>(null)
+    const [sideBarVisible, setSideBarVisible] = useState(false)
 
     const [error, setError] = useState<string | null>(null)
     const socket = useRef<Socket | null>(null)
@@ -97,47 +101,63 @@ export default function Equipos() {
 
 
     return (
-        <div className='w-[100%] pt-10 min-h-[100vh] flex justify-center items-center flex-col bg-[#1f1f21] text-white'>
-            <Logo/>
+        <div className='bg-[#131516]'>
+            <div className='w-[100%] pt-10 min-h-[100vh] flex justify-center items-center flex-col bg-[#131516] text-white'>
+                <div className='mb-25'>
+                    <Logo />
+                </div>
 
-            {tablas ? <>
-                <div onClick={() => {
-                    setClampTable((last) => {
-                        return last + 1 > 2 ? 1 : last + 1
-                    })
-                }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable == 1 ? 'Normal' : 'Agrandadas' }</div>
+                <img onClick={
+                    () => {
+                        setSideBarVisible(last => !last)
 
-                <h1 className='text-4xl sm:text-5xl text-center mb-10'>Información del personal</h1>
-
-
-            </> : null}
+                    }
+                } className='z-3 fixed top-0 left-0 w-5 h-5 ml-2 mt-2' src={Options} alt="" />
+                {sideBarVisible ? <SideBar modoTablas={clampTable} setModoTablas={setClampTable} setSideBar={setSideBarVisible} /> : null}
 
 
-            <div className='w-[90%] h-[85%]  border-1 text-white p-5 flex  flex-col items-center justify-center gap-y-10'>
+                {tablas ? <>
+                    <div onClick={() => {
+                        setClampTable((last) => {
+                            return last + 1 > 2 ? 1 : last + 1
+                        })
+                    }} className='sm:hidden max-w-50 max-h-50 bg-sky-950 p-3 text-center border-1 hover:bg-slate-800 mb-20'>Modo de tablas: {clampTable == 1 ? 'Normal' : 'Agrandadas'}</div>
 
-                {
+                    <h1 className='text-4xl sm:text-5xl text-center mb-10'>Información del personal</h1>
 
-                    tablas ?
-                        <contextoPopoutPersonal.Provider value={popout.current}>
-                            <contextoExcel.Provider value={excelActaulizado}>
-                                <>
-                                    {<Info ref={popout} />}
 
-                                    {imagenPersonal ? <img src={imagenPersonal} alt="" /> : null}
+                </> : null}
 
-                                    <h2 className='text-4xl '>Expeditor</h2>
 
-                                    <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Persona as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Persona} />
+                <div className='w-[90%] h-[85%]  border-1 text-white p-5 flex  flex-col items-center justify-center gap-y-10'>
 
-                                </>
-                            </contextoExcel.Provider>
-                        </contextoPopoutPersonal.Provider>
-                        : error ? <p className='text-center text-red-500 text-3xl'>
-                            {error}
-                        </p> : 'Cargando datos...'
-                }
+                    {
+
+                        tablas ?
+                            <contextoPopoutPersonal.Provider value={popout.current}>
+                                <contextoExcel.Provider value={excelActaulizado}>
+                                    <>
+                                        {<Info ref={popout} />}
+
+                                        {imagenPersonal ? <img src={imagenPersonal} alt="" /> : null}
+
+                                        <h2 className='text-4xl '>Expeditor</h2>
+
+                                        <Table formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Persona as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Persona as any} />
+
+                                    </>
+                                </contextoExcel.Provider>
+                            </contextoPopoutPersonal.Provider>
+                            : error ? <p className='text-center text-red-500 text-3xl'>
+                                {error}
+                            </p> : 'Cargando datos...'
+                    }
+
+                </div>
 
             </div>
+
+            <Foter />
 
         </div>
     )

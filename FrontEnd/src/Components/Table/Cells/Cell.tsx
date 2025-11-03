@@ -28,7 +28,7 @@ export default forwardRef<objetoCelda, celdaProps>(({ dato, popOutFuncion }, ref
     const popoutGlobal = useContext(contextoPopout)
     const popoutPersonal = useContext(contextoPopoutPersonal)
     const popout = popoutGlobal || popoutPersonal
-    
+
     const [color, setColor] = useState<textColor>('text-white')
     const [bgColor, setBgColor] = useState<bgColor | null>(null)
 
@@ -54,7 +54,7 @@ export default forwardRef<objetoCelda, celdaProps>(({ dato, popOutFuncion }, ref
 
     useEffect(() => {
 
-        setContenido(typeof dato === 'string' ? dato != '' ? dato.trim() : 'Sin dato.' : null)
+        setContenido(typeof dato === 'string' ? dato != '' && dato !== 'undefined' ? dato.trim() : 'Sin dato.' : null)
 
         celdaActualizada?.[1](contenido)
 

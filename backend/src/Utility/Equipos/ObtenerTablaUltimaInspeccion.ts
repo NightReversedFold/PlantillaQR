@@ -1,39 +1,17 @@
-import read from '../ReadSheet'
-import { mantenerDatosObjeto } from '../ObjectUtil'
+import { newC } from "../ReadAndWriteXSL"
 
-type reduceType = Record<string,string[]>
-
-const clavesQueMantenerTablaChecklist = [
-    'Vehículo Volcan Nevado','Fecha de envío', 'Inspeccionado por:','Fecha inspección','Kilometraje','Kilometraje Próxima mantención','Análisis del bot inspector de vehículos','Apto'
-]
+type reduceType = Record<string, string[]>
 
 
-export default async function obtenerTablaDePatenteDeChecklist (patente: string): Promise<reduceType>  {
+export default async function obtenerTablaDePatenteDeChecklist(patente: string): Promise<reduceType> {
+    const res = await newC.query(`SELECT * FROM Checklist WHERE vehiculo_volcan_nevado = $1 ORDER BY fecha_de_envio DESC LIMIT 1`, [patente])
 
-    const arrayCheckListRes  = await read(patente.toUpperCase().trim(), '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk')
+    delete res.rows[0]?.observaciones
+    delete res.rows[0]?.indice
 
+    if (res.rows[0]?.hasOwnProperty('apto')) {
+        res.rows[0].apto = String(res.rows[0].apto)
+    }
 
-    const arraysCheckListConPatente: string[][] | undefined = arrayCheckListRes!.filter(
-        (subArr: string[]) => {
-            return subArr.some(subStr =>{
-                const is = subStr.replace(/\s/g,'').toLowerCase().includes(patente.replace(/\s/g, '').toLowerCase())
-
-                return is
-            }) 
-        }
-    )
-
-    const arrayDeUltimaFila = arraysCheckListConPatente[arraysCheckListConPatente.length - 1]
-
-    const objetoConvertido = arrayDeUltimaFila!.reduce<reduceType>((acc, valor, indx) => {
-        
-        acc[arrayCheckListRes![0][indx].trim()] = [valor.trim()]
-        
-        return acc
-    }, {})
-
-
-    const objetoSinDatosInnecesarios:Record<string, any> = mantenerDatosObjeto(objetoConvertido,clavesQueMantenerTablaChecklist)
-    
-    return objetoSinDatosInnecesarios
+    return res.rows
 }
