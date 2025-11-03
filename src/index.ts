@@ -242,6 +242,8 @@ app.post('/SetUsers', async (req, res) => {
         ])
 
         console.log(resx)
+        
+        checarUltimosChecklist()
 
         res.status(200).json({ msg: 'Usuario agregado existosamente.', indice: resx.rows[0].indice })
 

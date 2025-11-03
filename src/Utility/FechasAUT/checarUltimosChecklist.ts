@@ -1,3 +1,4 @@
+import { ScheduledTask } from "node-cron";
 import { mensajesCorreo } from "../checkListAUT/principal";
 import { newC } from "../ReadAndWriteXSL";
 import SendGmail from "../SendGmail";
@@ -13,12 +14,17 @@ const obtenerPatentes = async () => {
     return rows
 }
 
+const tasks: ScheduledTask[] = []
 
 export default async () => {
+    tasks.forEach((task) => {
+        task.destroy()
+    })
+
     const patentes = await obtenerPatentes()
 
     patentes.forEach(({ patente }) => {
-        console.log(patente=='TDXR19')
+        console.log(patente == 'TDXR19')
         cronCall('30 10 * * *', async () => {
             try {
                 const ultimoChecklist = await newC.query(`SELECT * FROM Checklist WHERE vehiculo_volcan_nevado = $1 AND fecha_inspeccion = CURRENT_DATE LIMIT 1`, [patente.toUpperCase().trim()])
@@ -76,7 +82,7 @@ export default async () => {
 
 
 
-        })
+        }, tasks)
     })
 }
 

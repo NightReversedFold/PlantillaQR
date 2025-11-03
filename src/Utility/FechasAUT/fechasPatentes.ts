@@ -23,8 +23,8 @@ const fechasAEscuchar: string[] = [
 
 const tasks: ScheduledTask[] = []
 
-export function cronCall(fecha: string, callBack: () => void) {
-    tasks.push(cron.schedule(fecha, callBack, {
+export function cronCall(fecha: string, callBack: () => void, tasksx: ScheduledTask[]) {
+    tasksx.push(cron.schedule(fecha, callBack, {
         timezone: 'America/Santiago'
     }))
 }
@@ -79,7 +79,7 @@ async function expirationAdvice(fechaStr: Date, patente: string, cabecera: strin
         }
 
 
-    }) // fecha expiracion
+    }, tasks) // fecha expiracion
 
     fechaStr.setDate(fechaStr.getDate() - 4)
 
@@ -112,7 +112,7 @@ async function expirationAdvice(fechaStr: Date, patente: string, cabecera: strin
             SendGmail(Body, 'angel74977@gmail.com', Header)
         }
 
-    }) // fecha original -4 dias
+    }, tasks) // fecha original -4 dias
 
 
 }
