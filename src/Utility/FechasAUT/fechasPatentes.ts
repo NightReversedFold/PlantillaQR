@@ -1,256 +1,167 @@
-import cron, { NodeCron } from "node-cron";
+import cron from "node-cron";
 import { ScheduledTask } from "node-cron";
-import read from '../ReadSheet'
 import SendGmail from "../SendGmail";
+import { newC } from "../ReadAndWriteXSL";
+import { mensajesCorreo } from "../checkListAUT/principal";
 
 let tareaEjecutandose = Promise.resolve()
 
 type fechaType = `${string}/${string}/${string}`
 
 const fechasAEscuchar: string[] = [
-    'Fecha aprobacion vehiculo',
-    'Fecha Permiso Circulacion',
+    'fecha_revision_tecnica',
+    'fecha_permiso_circulacion',
+    'fecha_expiracion_licencia_interna',
+    'fecha_expiracion_de_documento_del_personal',
+    'fecha_expiracion_de_documento_de_examen_del_personal',
+    'fecha_expiracion_de_documento_psicosensometrico_del_personal',
+    'fecha_expiracion_de_documento_de_manejo_defensiva_del_personal',
+    'fecha_expiracion_de_documento_de_areas_circulares_del_personal',
+    'fecha_expiracion_licencia_municipal',
+    'fecha_de_expiracion_certificado_de_competencias'
 ]
-
-const parseFecha = (fecha: fechaType): Date => {
-    // mes, dia, año --> año, mes, dia
-
-    const [mes, dia, anio] = fecha.split('/').map(Number)
-
-    return new Date(anio, mes - 1, dia)
-}
 
 const tasks: ScheduledTask[] = []
 
-function cronCall(fecha: string, callBack: () => void) {
+export function cronCall(fecha: string, callBack: () => void) {
     tasks.push(cron.schedule(fecha, callBack, {
         timezone: 'America/Santiago'
     }))
 }
 
-async function obtenerPatenteDeFaena(patente, hoja): Promise<[string[] | undefined, string[]]> {
-    const arrayExpeditorRes = await read('Reporte Flexible Vehiculos', hoja)
+async function obtenerCorreosParaAviso() {
+    const res = await newC.query('SELECT nombre,correo FROM Usuarios WHERE cargo = $1 OR cargo = $2', ['Adm.Contratos', 'SoporteDGM'])
 
-    const arrayExpeditorConPatente: string[] | undefined = arrayExpeditorRes!.find(
-        (subArr: string[]) => {
-            return subArr.some(subStr => {
-                const is = subStr.replace(/\s/g, '').toLowerCase().includes(patente.replace(/\s/g, '').toLowerCase())
-                return is
-            })
-        }
-    )
-
-    return [arrayExpeditorConPatente, arrayExpeditorRes[0]]
+    return res.rows
 }
 
-async function expirationAdvice(fechaStr: fechaType, patente: string, cabecera: string, faena: string) {
-    const fecha = fechaStr.split('/').map(Number)
+async function obtenerCorreosParaAvisoKilometrajes() {
+    const res = await newC.query('SELECT nombre,correo FROM Usuarios WHERE cargo = $1 OR cargo = $2', ['Taller mecanico', 'SoporteDGM'])
 
-    if (!isNaN(fecha[0])) {
-        let [mes, dia, anio] = fecha
+    return res.rows
+}
 
-        const fechaParsed = parseFecha(fechaStr)
+async function expirationAdvice(fechaStr: Date, patente: string, cabecera: string, faena: string) {
+    const fecha = new Date(fechaStr)
 
-        if (!isNaN(mes) && !isNaN(dia) && !isNaN(anio)) {
-            console.log(dia, mes, anio)
+    if (fecha && isNaN(fecha.getTime())) return
 
-            cronCall(`0 0 ${dia} ${mes} *`, async () => {
-                if (new Date().getFullYear() === Number(anio)) {
+    //if (!(fechaStr instanceof Date)) { return }
 
-                    tareaEjecutandose.finally(() => {
-                        tareaEjecutandose = new Promise(async resolve => {
-                            const correos = await obtenerCorreosDeResMala()
+    let diaM = fechaStr.getDate()
+    let mesM = fechaStr.getMonth() + 1
+    let anioM = fechaStr.getFullYear()
 
-                            correos.forEach(async correo => {
-                                await SendGmail(`Buen dia, se le manda este correo para informarle que la "${cabecera}" de la patente ${patente} llegó a su fecha de expiración.`, correo, `"${cabecera}" de la faena ${faena} llego a su fecha de expiracion.`)
-                                await new Promise(resolve => setTimeout(resolve, 2000))
-                            })
+    cronCall(`0 0 ${diaM} ${mesM} *`, async () => {
+        try {
+            if (new Date().getFullYear() === Number(anioM)) {
 
-                            setTimeout(resolve, 1000);
+                tareaEjecutandose.finally(() => {
+                    tareaEjecutandose = new Promise(async resolve => {
+                        const correos = await obtenerCorreosParaAviso()
 
-                        })
+                        for (const correoF of correos) {
+                            const { nombre, correo } = correoF
+
+                            await SendGmail(`Buen dia ${nombre}, se le manda este correo para informarle que la "${cabecera}" de la patente ${patente} llegó a su fecha de expiración.`, correo, `"${cabecera}" de la faena ${faena} llego a su fecha de expiracion.`)
+                            await new Promise(resolvex => setTimeout(resolvex, 2000))
+                        }
+
+                        setTimeout(resolve, 1000);
+
                     })
-                }
-            }) // fecha expiracion
+                })
+            }
+        } catch (e) {
+            const { Body, Header } = mensajesCorreo.Error(`Error en fecha cron call expiracion ${fechaStr}: ${e}`)
 
-            fechaParsed.setDate(fechaParsed.getDate() - 4)
+            SendGmail(Body, 'angel74977@gmail.com', Header)
+        }
 
-            fechaParsed.setDate(fechaParsed.getDate() - 4)
 
-            const diaM = fechaParsed.getDate()
-            const mesM = fechaParsed.getMonth() + 1
-            const anioM = fechaParsed.getFullYear()
+    }) // fecha expiracion
 
-            cronCall(`0 0 ${diaM} ${mesM} *`, () => {
-                if (new Date().getFullYear() === Number(anio)) {
-                    tareaEjecutandose.finally(() => {
-                        tareaEjecutandose = new Promise(async resolve => {
-                            const correos = await obtenerCorreosDeResMala()
+    fechaStr.setDate(fechaStr.getDate() - 4)
 
-                            correos.forEach(async correo => {
-                                await SendGmail(`Buen dia, se le manda este correo para informarle que faltan 4 días para que "${cabecera}" de la patente ${patente} expire.`, correo, `"${cabecera}" de la faena ${faena} a punto de expirar.`)
-                                await new Promise(resolve => setTimeout(resolve, 2000))
+    diaM = fechaStr.getDate()
+    mesM = fechaStr.getMonth() + 1
+    anioM = fechaStr.getFullYear()
 
-                            })
-                            setTimeout(resolve, 1000);
+    cronCall(`0 0 ${diaM} ${mesM} *`, () => {
+        try {
+            if (new Date().getFullYear() === Number(anioM)) {
+                tareaEjecutandose.finally(() => {
+                    tareaEjecutandose = new Promise(async resolve => {
+                        const correos = await obtenerCorreosParaAviso()
 
-                        })
+                        for (const correoF of correos) {
+                            const { nombre, correo } = correoF
+
+                            await SendGmail(`Buen dia ${nombre}, se le manda este correo para informarle que faltan 4 días para que "${cabecera}" de la patente ${patente} expire.`, correo, `"${cabecera}" de la faena ${faena} a punto de expirar.`)
+                            await new Promise(resolvex => setTimeout(resolvex, 2000))
+                        }
+
+                        setTimeout(resolve, 1000);
+
                     })
-                }
-            }) // fecha original -4 dias
-        }
-    }
-}
-
-async function expirationAdvicePorPatente(patente) {
-    try {
-        const [arrayExpeditorResGrabrielaMistral, cabecerasS] = await obtenerPatenteDeFaena(patente, '1FstxQjwuNJuVwrMtf3lkU1koyB-3QPwRV12l7yMCqNU')
-
-        cabecerasS.forEach((cabecera, indx) => {
-            if (fechasAEscuchar.includes(cabecera.trim())) {
-                expirationAdvice(arrayExpeditorResGrabrielaMistral[indx] as fechaType, patente, cabecera, 'DGM')
+                })
             }
-        })
+        } catch (e) {
+            const { Body, Header } = mensajesCorreo.Error(`Error en fecha cron call -4 dias ${fechaStr}: ${e}`)
 
-    } catch (e) {
-
-    }
-
-    try {
-        const [arrayExpeditorResGrabrielaMistral, cabecerasS] = await obtenerPatenteDeFaena(patente, '1siFiCDXyMSMyO5EMyCjrU1JTBRVqYxz1HQJrdh3XaSc')
-
-        cabecerasS.forEach((cabecera, indx) => {
-            if (fechasAEscuchar.includes(cabecera.trim())) {
-                expirationAdvice(arrayExpeditorResGrabrielaMistral[indx] as fechaType, patente, cabecera, 'DCH')
-            }
-        })
-
-    } catch (e) {
-
-    }
-
-    try {
-        const [arrayExpeditorResGrabrielaMistral, cabecerasS] = await obtenerPatenteDeFaena(patente, '158kbb9f-CekfzZ0WbhdX8DlIWsPwvf-pHJ-_vM4a7Cw')
-
-        cabecerasS.forEach((cabecera, indx) => {
-            if (fechasAEscuchar.includes(cabecera.trim())) {
-                expirationAdvice(arrayExpeditorResGrabrielaMistral[indx] as fechaType, patente, cabecera, 'DMH')
-            }
-        })
-
-    } catch (e) {
-
-    }
-
-    try {
-        const [arrayExpeditorResGrabrielaMistral, cabecerasS] = await obtenerPatenteDeFaena(patente, '1U-8jWwCUd_YWwVy_bcRm52WwhykT300luDvQvorg9Zs')
-
-        cabecerasS.forEach((cabecera, indx) => {
-            if (fechasAEscuchar.includes(cabecera.trim())) {
-                expirationAdvice(arrayExpeditorResGrabrielaMistral[indx] as fechaType, patente, cabecera, 'DRT')
-            }
-        })
-
-    } catch (e) {
-
-    }
-}
-
-async function obtenerUltimoChecklist(patente: string): Promise<[string[] | undefined, string[]]> {
-    const arrayCheckListRes = await read(patente, '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk')
-
-    const arraysCheckListConPatente: string[][] | undefined = arrayCheckListRes!.filter(
-        (subArr: string[]) => {
-            return subArr.some(subStr => {
-                const is = subStr.replace(/\s/g, '').toLowerCase().includes(patente.replace(/\s/g, '').toLowerCase())
-
-                return is
-            })
-        }
-    )
-
-    return [arraysCheckListConPatente[arraysCheckListConPatente.length - 1], arrayCheckListRes[0]]
-}
-
-async function obtenerCorreosDeResMala(): Promise<string[]> {
-    const arrayCheckListRes = await read('Base de datos', '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk')
-
-    const cabeceraIndxCorreos = arrayCheckListRes[0].indexOf('CorreosProblemas')
-
-    const correos = []
-
-    arrayCheckListRes.forEach((fila, indx) => {
-        if (indx != 0) {
-            fila.forEach((dato, datoIndx) => {
-                if (datoIndx === cabeceraIndxCorreos) {
-                    correos.push(dato)
-                }
-            })
-        }
-    })
-
-    return correos
-}
-
-const kilometrajesHistory: Record<string, {
-    kilometraje: number | null,
-    kilometrajeProxMantencion: number | null
-}> = {}
-
-async function comparaKilometrajes(patente: string) {
-    try {
-        if (!kilometrajesHistory.hasOwnProperty(patente)) {
-            kilometrajesHistory[patente] = {
-                kilometraje: null,
-                kilometrajeProxMantencion: null
-            }
+            SendGmail(Body, 'angel74977@gmail.com', Header)
         }
 
-        const [fila, cabeceras] = await obtenerUltimoChecklist(patente)
+    }) // fecha original -4 dias
 
-        let kilometraje, kmProxMantencion
 
-        cabeceras.forEach((cabecera, indx) => {
-            console.log(cabecera.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s/g, '').replace(/\r?\n/g, '').trim())
+}
 
-            switch (cabecera.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s/g, '').replace(/\r?\n/g, '').trim()) {
-                case 'Kilometraje':
-                    kilometraje = Number(fila[indx].replace(/[^\d]/g, '').replace(/\r?\n/g, ''))
-                    break
-                case 'KilometrajePróximamantención':
-                    kmProxMantencion = Number(fila[indx].replace(/[^\d]/g, '').replace(/\r?\n/g, ''))
-                    break
-            }
-        })
+export async function compararKilometrajes() {
 
-        console.log(kilometraje, kmProxMantencion)
+    try {
+        const correos = await obtenerCorreosParaAvisoKilometrajes()
 
-        if ((!isNaN(kilometraje) && !isNaN(kmProxMantencion)) && (kilometrajesHistory[patente].kilometraje != kilometraje || kilometrajesHistory[patente].kilometrajeProxMantencion != kmProxMantencion)) {
-            kilometrajesHistory[patente].kilometraje = kilometraje
-            kilometrajesHistory[patente].kilometrajeProxMantencion = kmProxMantencion
+        const checklists = await newC.query(`SELECT DISTINCT ON (t1.vehiculo_volcan_nevado)
+                                                    t1.vehiculo_volcan_nevado,
+                                                    t1.kilometraje,
+                                                    t1.kilometraje_proxima_mantencion
+                                                FROM Checklist t1
+                                                INNER JOIN Usuarios t2 ON t2.patente = t1.vehiculo_volcan_nevado
+                                                ORDER BY t1.vehiculo_volcan_nevado, t1.fecha_de_envio DESC`)
 
-            const resta = (kmProxMantencion - kilometraje)
+        for (const fila of checklists.rows) {
+            const { vehiculo_volcan_nevado, kilometraje_proxima_mantencion, kilometraje } = fila
+
+            const resta = kilometraje_proxima_mantencion - kilometraje
 
             if (resta <= 800 && resta > 0) {
-                const correos = await obtenerCorreosDeResMala()
+                for (const correoF of correos) {
+                    const { nombre, correo } = correoF
 
-                correos.forEach(async correo => {
-                    await SendGmail(`Buen dia, se le manda este correo para informarle que el kilometraje (${kilometraje}) del vehículo con la patente ${patente} está apunto de llegar a los ${kmProxMantencion} kilometros.`, correo, `Kilometraje de la patente ${patente} a punto de llegar al kilometraje de la proxima mantencion.`)
-
+                    await SendGmail(`Buen dia ${nombre}, se le manda este correo para informarle que el kilometraje (${kilometraje}) del vehículo con la patente ${vehiculo_volcan_nevado} está apunto de llegar a los ${kilometraje_proxima_mantencion} kilometros.`, correo, `Kilometraje de la patente ${vehiculo_volcan_nevado} a punto de llegar al kilometraje de la proxima mantencion.`)
                     await new Promise(resolve => setTimeout(resolve, 2000))
-                })
-            } else if (resta <= 0) {
-                const correos = await obtenerCorreosDeResMala()
 
-                correos.forEach(async correo => {
-                    await SendGmail(`Buen dia, se le manda este correo para informarle que el kilometraje (${kilometraje}) del vehículo con la patente ${patente} ha llegado a los ${kmProxMantencion} kilometros.`, correo, `Kilometraje de la patente ${patente} llego al kilometraje de la proxima mantencion.`)
+                }
+
+                continue
+            }
+
+            if (resta <= 0) {
+                for (const correoF of correos) {
+                    const { nombre, correo } = correoF
+
+                    await SendGmail(`Buen dia ${nombre}, se le manda este correo para informarle que el kilometraje (${kilometraje}) del vehículo con la patente ${vehiculo_volcan_nevado} ha llegado a los ${kilometraje_proxima_mantencion} kilometros.`, correo, `Kilometraje de la patente ${vehiculo_volcan_nevado} llego al kilometraje de la proxima mantencion.`)
                     await new Promise(resolve => setTimeout(resolve, 2000))
-                })
+
+                }
             }
         }
 
     } catch (e) {
-        console.log(e)
+        const { Body, Header } = mensajesCorreo.Error(e)
+
+        SendGmail(Body, 'angel74977@gmail.com', Header)
     }
 }
 
@@ -259,14 +170,39 @@ export async function escucharFechas() {
         task.destroy()
     })
 
-    expirationAdvicePorPatente('TDXR19')
-    expirationAdvicePorPatente('TDXL15')
-    expirationAdvicePorPatente('TZTZ54')
+    try {
+        const expeditor = await newC.query(`SELECT *
+                                      FROM Expeditor t1
+                                      WHERE EXISTS(
+                                        SELECT 1
+                                        FROM Usuarios t2
+                                        WHERE t2.patente = t1.patente
+                                      ); `)
+
+        expeditor.rows.forEach(fila => {
+
+            fechasAEscuchar.forEach(nombreFecha => {
+                if (fila.hasOwnProperty(nombreFecha)) {
+                    expirationAdvice(fila[nombreFecha], fila.patente, nombreFecha, fila.faena)
+                }
+            });
+        })
+
+        // const personal = await newC.query('SELECT * FROM Personal')
+
+        // personal.rows.forEach(fila => {
+        //     fechasAEscuchar.forEach(nombreFecha => {
+        //         if (fila.hasOwnProperty(nombreFecha)) {
+        //             expirationAdvice(fila[nombreFecha], fila.patente, nombreFecha, fila.faena)
+        //         }
+        //     });
+        // })
+
+    } catch (e) {
+        const { Body, Header } = mensajesCorreo.Error(e)
+
+        SendGmail(Body, 'angel74977@gmail.com', Header)
+    }
 
 }
 
-export async function esucharKilometrajes() {
-    comparaKilometrajes('TDXR19')
-    comparaKilometrajes('TDXL15')
-    comparaKilometrajes('TZTZ54')
-}

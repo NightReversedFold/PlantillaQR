@@ -1,10 +1,12 @@
-import read from "../ReadSheet";
 
 import OpenAI from "openai";
 
 import { OPENAI_API_KEY } from "../config";
-import AppendSheet from "../AppendSheet";
 import SendGmail from "../SendGmail";
+
+import { newC } from "../ReadAndWriteXSL";
+import obtenerTablaDePatenteDeChecklist from "../Equipos/ObtenerTablaUltimaInspeccion";
+import obtenerTablaDePatenteDeTallerMecanico from "../Equipos/ObtenerTablaTallerMecanico";
 
 const client = new OpenAI({ apiKey: OPENAI_API_KEY });
 
@@ -65,7 +67,50 @@ const posibleNumero = (nm: string) => {
     const limpio = nm.trim()
     const posibleNumero = Number(nm.trim())
 
-    return isNaN(posibleNumero) ? limpio : posibleNumero
+    return isNaN(posibleNumero) ? limpio ?? null : posibleNumero
+}
+
+export const mensajesCorreo = {
+    'KilometrajeMayorQueProxMant': (filaTallerNombre: string, patente: string) => {
+        return {
+            Body: `Buen dia ${filaTallerNombre} se envía este correo para informarle que el kilometraje puesto en el checklist de la patente ${patente} es mayor que el kilometraje de la próxima mantención.`,
+            Header: `Inspeccion de vehiculo no apto patente: ${patente}`
+        }
+    },
+    'ProxMantDistintos': (filaTallerNombre: string, patente: string) => {
+        return {
+            Body: `Buen dia ${filaTallerNombre} se le envía este correo para informarle que los kilometrajes de la patente ${patente} de la próxima mantención del checklist y de la base de datos del taller son distintos`,
+            Header: `Inspeccion de vehiculo no apto patente: ${patente}`
+        }
+    },
+
+    'RespuestaMala': (nombre: string, patente: string, recomendacionesBot: string, descripcionBot: string, tipo: 'gerente' | 'taller') => {
+        return {
+            Body: `Buen dia ${nombre} se envía este correo para informarle que ${tipo == 'gerente' ? 'su' : 'el'} vehículo ${patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${recomendacionesBot}\n${descripcionBot}`,
+            Header: `Inspeccion de vehiculo no apto patente: ${patente}`
+
+        }
+    },
+
+    'NoSeHizoUltimoChecklist': (patente: string, nombre: string, personal: 'Duenio' | 'Soporte' | 'Adm.Contratos') => {
+        return {
+            Body: personal === 'Duenio' ?
+                `Buen dia ${nombre}: Se le pide por favor que haga el chequeo del vehículo ${patente}, usar código QR del equipo.` :
+                personal === 'Adm.Contratos' ?
+                    `Buen dia ${nombre}: Se le envía este correo para informarle que no se ha realizado el checklist de la patente ${patente} del dia de hoy.` :
+                    personal === 'Soporte' ?
+                        `Buen dia ${nombre}: Se le envía este correo para informarle que no se ha realizado el checklist de la patente ${patente} del dia de hoy.` : null
+            ,
+            Header: `Realizar formulario del vehiculo`
+        }
+    },
+
+    'Error': (error) => {
+        return {
+            Body: 'Hubo un error: ' + String(error),
+            Header: 'Error'
+        }
+    }
 }
 
 export default async (datos: InspeccionBody) => {
@@ -95,127 +140,51 @@ export default async (datos: InspeccionBody) => {
         const proxMant = nuevoObjeto.Principales["Kilometraje Próxima mantención"]
         const km = nuevoObjeto.Principales.Kilometraje
 
-        console.log(proxMant, km)
 
         return km && proxMant && km > 0 && proxMant > 0 && proxMant >= km + 1
     }
 
     async function obtenerGerente() {
-        const filaPatente = await read('Base de datos', '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk')
+        const gerente = await newC.query('SELECT * FROM Usuarios WHERE cargo = $1 AND patente = $2', ['Adm.Contratos', nuevoObjeto.Principales.Patente.toUpperCase()])
 
-        const fila = filaPatente.find((arr) => {
-            return arr.includes(nuevoObjeto.Principales.Patente.toUpperCase()) && arr.includes('gerente')
-        })
-
-        if (fila) {
-            const convertido = {}
-
-            filaPatente[0].forEach((cabecera, indx) => {
-                if (cabecera !== 'CorreosProblemas') {
-                    if (fila[indx]) {
-                        convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
-                    }
-                }
-
-
-            })
-
-            return convertido
+        if (gerente && gerente.rows[0]) {
+            return gerente.rows[0]
         }
 
         throw new Error('Gerente no encontrado')
     }
 
     async function obtenerInspeccionador() {
-        const filaPatente = await read('Base de datos', '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk')
+        const inspeccionador = await newC.query(`SELECT * FROM Usuarios WHERE regexp_replace(rut, '[^0-9]', '', 'g') = $1`, [String(nuevoObjeto.Principales["Inspeccionado por RUT"]).replace(/\D/g, '')])
 
-        const fila = filaPatente.find((arr) => {
-            return arr.find((str) => {
-                return str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s/g, '').trim() == String(nuevoObjeto.Principales["Inspeccionado por RUT"]).replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s/g, '').trim()
-            })
-        })
-
-        if (fila) {
-            const convertido = {}
-
-            filaPatente[0].forEach((cabecera, indx) => {
-                if (cabecera !== 'CorreosProblemas') {
-                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
-                }
-            })
-
-            return convertido
+        if (inspeccionador && inspeccionador.rows[0]) {
+            return inspeccionador.rows[0]
         }
 
-        throw new Error('Inspeccionador no encontrado')
+        throw new Error('inspeccionador no encontrado')
+
     }
 
     async function ultimaInspeccion() {
-        const filaPatente = await read(nuevoObjeto.Principales.Patente.toUpperCase(), '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk')
+        const fila = await obtenerTablaDePatenteDeChecklist(nuevoObjeto.Principales.Patente.toUpperCase())
 
-        const fila = filaPatente[filaPatente.length - 1]
-
-        if (fila) {
-            const convertido = {}
-
-            filaPatente[0].forEach((cabecera, indx) => {
-                if (cabecera !== 'CorreosProblemas') {
-
-                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
-                }
-            })
-
-            return convertido
-        }
+        return fila[0]
     }
 
     async function proxMantencionTaller() {
-        const filaPatente = await read('mantencion', '18RdbR-6GNHhp6P3AtC5scB7WSbZz0TuGgIG1B29QRu0')
+        const fila = await obtenerTablaDePatenteDeTallerMecanico(nuevoObjeto.Principales.Patente.toUpperCase())
 
-        const fila = filaPatente.find((arr) => {
-            return arr.find((str) => {
-                return str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s+/g, '').toUpperCase() == nuevoObjeto.Principales.Patente.toUpperCase()
-            })
-        })
-
-        if (fila) {
-            const convertido = {}
-
-            filaPatente[1].forEach((cabecera, indx) => {
-                if (cabecera !== 'CorreosProblemas') {
-
-                    convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
-                }
-            })
-
-            return convertido
-        }
+        return fila[0]
     }
 
-    function Taller() {
-        return new Promise(async (resolve, reject) => {
-            const filaPatente = await read('Base de datos', '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk')
+    async function Taller() {
+        const taller = await newC.query(`SELECT * FROM Usuarios WHERE cargo = $1 AND patente = $2`, ['Taller mecanico', nuevoObjeto.Principales.Patente.toUpperCase()])
 
-            const fila = filaPatente.find((arr) => {
-                return arr.includes(nuevoObjeto.Principales.Patente.toUpperCase()) && arr.includes('TALLER MECANICO')
-            })
+        if (taller && taller.rows[0]) {
+            return taller.rows[0]
+        }
 
-            if (fila) {
-                const convertido = {}
-
-                filaPatente[0].forEach((cabecera, indx) => {
-                    if (cabecera !== 'CorreosProblemas') {
-
-                        convertido[cabecera.replace(/\n/g, '').trim()] = posibleNumero(fila[indx].replace(/\n/g, '').trim())
-                    }
-                })
-
-                resolve(convertido)
-                return
-            }
-            reject('Fila taller no encontrada')
-        })
-
+        throw new Error('taller no encontrado')
     }
 
 
@@ -270,8 +239,9 @@ export default async (datos: InspeccionBody) => {
 
     }
 
-    async function insertarRegistroValido(valores: string[]) {
-        AppendSheet(nuevoObjeto.Principales.Patente.toUpperCase(), '1qioLO-5d3mkYL60IxGGnO8_0-trync-RSNKhT3IFhuk', valores)
+    async function insertarRegistroValido(valores: any[]) {
+        newC.query(`INSERT INTO Checklist (vehiculo_volcan_nevado,fecha_de_envio,inspeccionado_por,fecha_inspeccion,kilometraje,kilometraje_proxima_mantencion,observaciones,analisis_del_bot_inspector_de_vehiculos,apto) 
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, valores)
     }
 
     try {
@@ -285,69 +255,85 @@ export default async (datos: InspeccionBody) => {
 
             const taller = Taller()
 
+            const kilometrajeLogico = !ultimaInspeccionFila || nuevoObjeto.Principales.Kilometraje >= ultimaInspeccionFila['kilometraje'] + 10
+
             taller.then(async (filaTaller: any) => {
+                if (!kilometrajeLogico) { return }
+
                 const proxMantecionT = await proxMantencionTaller()
 
-                console.log(proxMantecionT)
-                if (nuevoObjeto.Principales.Kilometraje >= nuevoObjeto.Principales["Kilometraje Próxima mantención"]) {
-                    SendGmail(`Buen dia ${filaTaller.Nombre} se envía este correo para informarle que el kilometraje puesto en el checklist de la patente ${nuevoObjeto.Principales.Patente.toUpperCase()} es mayor que el kilometraje de la próxima mantención.`, filaTaller.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                console.log(proxMantecionT, 'PRXO MANTENCION TALLER')
+
+                if (!proxMantecionT) { throw new Error('No se encontraron datos del taller en la base de datos.') }
+
+                if (nuevoObjeto.Principales.Kilometraje > nuevoObjeto.Principales["Kilometraje Próxima mantención"]) {
+                    const { Body, Header } = mensajesCorreo.KilometrajeMayorQueProxMant(filaTaller.nombre, nuevoObjeto.Principales.Patente.toUpperCase())
+                    SendGmail(Body, filaTaller.correo, Header)
                 }
 
-                const transformed = typeof proxMantecionT['PROXIMA MANTENCION (KMS/HRS)'] === 'string' ? Number(proxMantecionT['PROXIMA MANTENCION (KMS/HRS)'].replace(/[.,\/#!$%\^&\*;:{}=\-_`~()¿¡?]/g, "").replace(/\s+/g, '').trim()) : typeof proxMantecionT['PROXIMA MANTENCION (KMS/HRS)']
+                if (nuevoObjeto.Principales["Kilometraje Próxima mantención"] !== proxMantecionT['proxima_mantencion']) {
 
-                if (nuevoObjeto.Principales["Kilometraje Próxima mantención"] !== transformed) {
-                    SendGmail(`Buen dia ${filaTaller.Nombre} se le envía este correo para informarle que los kilometrajes de la patente ${nuevoObjeto.Principales.Patente.toUpperCase()} de la próxima mantención del checklist y de la base de datos del taller son distintos`, filaTaller.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                    const { Body, Header } = mensajesCorreo.ProxMantDistintos(filaTaller.nombre, nuevoObjeto.Principales.Patente.toUpperCase())
+                    SendGmail(Body, filaTaller.correo, Header)
+
                 }
 
+            }).catch(e => {
+                console.log(e)
             })
 
-            if (!ultimaInspeccionFila.hasOwnProperty('Kilometraje') || nuevoObjeto.Principales.Kilometraje >= ultimaInspeccionFila['Kilometraje'] + 10) {
+
+            if (kilometrajeLogico) {
                 const respuestaMala = hayRespuestaMala()
 
                 const resBot = await botInspector()
                 const resBotJSON = JSON.parse(resBot.choices[0].message.content)
 
-                console.log(resBot, nuevoObjeto, nuevoObjeto.Fecha, respuestaMala)
-
                 const newRow = [
-                    nuevoObjeto.Fecha as string,
-                    nuevoObjeto.Principales.Patente.toUpperCase() as string,
-                    nuevoObjeto.Principales["Inspeccionado por RUT"] as string,
-                    nuevoObjeto.Principales["Fecha inspección"] as string,
-                    nuevoObjeto.Principales.Kilometraje as any,
-                    JSON.stringify(nuevoObjeto.Principales["Kilometraje Próxima mantención"]),
-                    nuevoObjeto.Principales["OBSERVACIONES:"] as string,
-                    multiplesAText(),
-                    `
-                       ${resBotJSON.Recomendaciones}
-                       ${resBotJSON.Descripcion}
-
-                      `,
-                    JSON.stringify(respuestaMala)
+                    nuevoObjeto.Principales.Patente.toUpperCase(),
+                    nuevoObjeto.Fecha,
+                    nuevoObjeto.Principales["Inspeccionado por RUT"],
+                    nuevoObjeto.Principales["Fecha inspección"],
+                    nuevoObjeto.Principales.Kilometraje,
+                    nuevoObjeto.Principales["Kilometraje Próxima mantención"],
+                    nuevoObjeto.Principales["OBSERVACIONES:"],
+                    `${resBotJSON.Recomendaciones} ${resBotJSON.Descripcion}`,
+                    respuestaMala
                 ]
 
                 insertarRegistroValido(newRow)
 
-                console.log(resBotJSON)
-
                 if (respuestaMala || resBotJSON.Escala < 3) {
-                    SendGmail(`Buen dia ${gerente.Nombre} se envía este correo para informarle que su vehículo ${nuevoObjeto.Principales.Patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${resBotJSON.Recomendaciones.trim()}\n${resBotJSON.Descripcion.trim()}`, gerente.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                    let res = mensajesCorreo.RespuestaMala(gerente.nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'gerente')
+                    SendGmail(res.Body, gerente.correo, res.Header)
 
                     const tallerF: any = await taller
 
-                    SendGmail(`Buen dia ${tallerF.Nombre} se envía este correo para informarle que el vehículo ${nuevoObjeto.Principales.Patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${resBotJSON.Recomendaciones.trim()}\n${resBotJSON.Descripcion.trim()}`, tallerF.Correo, `Inspeccion de vehiculo no apto patente: ${nuevoObjeto.Principales.Patente.toUpperCase()}`)
+                    let { Body, Header } = mensajesCorreo.RespuestaMala(tallerF.nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'taller')
+                    SendGmail(Body, tallerF.correo, Header)
 
                 }
 
             } else {
-                throw new Error('Kilometraje ilógico')
+                const { Body, Header } = mensajesCorreo.Error(`Kilometraje ilogico, kilometraje checklist: ${nuevoObjeto.Principales.Kilometraje}, ultima inspeccion kiloemtraje: ${ultimaInspeccionFila['kilometraje']}`)
+
+                SendGmail(Body, 'angel74977@gmail.com', Header)
+
+                throw new Error('Kilometraje ilógico ')
             }
 
         } else {
+            const { Body, Header } = mensajesCorreo.Error(`Kilometraje ilogico, km proxima mantencion: ${nuevoObjeto.Principales["Kilometraje Próxima mantención"]}, kilometraje checklist: ${nuevoObjeto.Principales.Kilometraje}`)
+
+            SendGmail(Body, 'angel74977@gmail.com', Header)
+
             throw new Error('Kilometraje fallido')
         }
     } catch (e) {
         console.log(e)
+        const { Body, Header } = mensajesCorreo.Error(e)
+
+        SendGmail(Body, 'angel74977@gmail.com', Header)
 
     }
 
