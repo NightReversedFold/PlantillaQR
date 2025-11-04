@@ -32,7 +32,7 @@ export default async () => {
                 const rows = ultimoChecklist.rows
 
                 if (rows.length <= 0) {
-                    const coreros = await newC.query(`SELECT nombre,correo,cargo FROM Usuarios WHERE patente = $1 AND cargo IN ('Adm.Contratos','Dueño') OR cargo LIKE 'Soporte%'`, [patente])
+                    const coreros = await newC.query(`SELECT nombre,correo,cargo FROM Usuarios WHERE (cargo = 'Dueño' AND patente = $1) OR cargo = 'Adm.Contratos' OR cargo LIKE 'Soporte%'`, [patente])
                     const filaCorreos: {
                         nombre: string,
                         correo: string,
