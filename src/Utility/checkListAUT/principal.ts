@@ -257,7 +257,7 @@ export default async (datos: InspeccionBody) => {
 
             const taller = Taller()
 
-            const kilometrajeLogico = !ultimaInspeccionFila || nuevoObjeto.Principales.Kilometraje >= ultimaInspeccionFila['kilometraje'] + 10
+            const kilometrajeLogico = !ultimaInspeccionFila || nuevoObjeto.Principales.Kilometraje >= ultimaInspeccionFila['kilometraje']
 
             taller.then(async (filaTaller: any) => {
                 if (!kilometrajeLogico) { return }
