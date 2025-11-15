@@ -25,7 +25,7 @@ export default async () => {
 
     patentes.forEach(({ patente }) => {
         console.log(patente == 'TDXR19')
-        cronCall('30 10 * * *', async () => {
+        cronCall('30 10 * * 1-5', async () => {
             try {
                 const ultimoChecklist = await newC.query(`SELECT * FROM Checklist WHERE vehiculo_volcan_nevado = $1 AND fecha_inspeccion = CURRENT_DATE LIMIT 1`, [patente.toUpperCase().trim()])
 

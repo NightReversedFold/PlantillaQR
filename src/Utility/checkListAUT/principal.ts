@@ -84,7 +84,7 @@ export const mensajesCorreo = {
         }
     },
 
-    'RespuestaMala': (nombre: string, patente: string, recomendacionesBot: string, descripcionBot: string, tipo: 'gerente' | 'taller') => {
+    'RespuestaMala': (nombre: string, patente: string, recomendacionesBot: string, descripcionBot: string, tipo: 'gerente' | 'taller' | 'soporte' | 'usuario') => {
         return {
             Body: `Buen dia ${nombre} se envía este correo para informarle que ${tipo == 'gerente' ? 'su' : 'el'} vehículo ${patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${recomendacionesBot}\n${descripcionBot}`,
             Header: `Inspeccion de vehiculo no apto patente: ${patente}`
@@ -155,7 +155,7 @@ export default async (datos: InspeccionBody) => {
     }
 
     async function obtenerInspeccionador() {
-        console.log(String(nuevoObjeto.Principales["Inspeccionado por RUT"]),'INSPECCIONADOOOOOOOOOR')
+        console.log(String(nuevoObjeto.Principales["Inspeccionado por RUT"]), 'INSPECCIONADOOOOOOOOOR')
 
         const inspeccionador = await newC.query(`SELECT * FROM Usuarios WHERE regexp_replace(rut, '[^0-9]', '', 'g') = $1 AND cargo in ('Adm.Contratos','Usuario','Dueño')`, [String(nuevoObjeto.Principales["Inspeccionado por RUT"]).replace(/\D/g, '')])
 
@@ -171,6 +171,12 @@ export default async (datos: InspeccionBody) => {
         const fila = await obtenerTablaDePatenteDeChecklist(nuevoObjeto.Principales.Patente.toUpperCase())
 
         return fila[0]
+    }
+
+    async function obtenerSoporteDGM() {
+        const coreros = await newC.query(`SELECT nombre,correo FROM Usuarios WHERE cargo = 'SoporteDGM'`)
+
+        return coreros.rows
     }
 
     async function proxMantencionTaller() {
@@ -251,7 +257,7 @@ export default async (datos: InspeccionBody) => {
         if (checarKilometraje()) {
             const gerente: Record<string, string> = await obtenerGerente()
 
-            await obtenerInspeccionador()
+            const inspeccionador = await obtenerInspeccionador()
 
             const ultimaInspeccionFila = await ultimaInspeccion()
 
@@ -306,6 +312,31 @@ export default async (datos: InspeccionBody) => {
                 insertarRegistroValido(newRow)
 
                 if (respuestaMala || resBotJSON.Escala < 3) {
+
+                    try {
+                        const correosDGM = await obtenerSoporteDGM()
+
+                        for (const { nombre, correo } of correosDGM) {
+                            let res = mensajesCorreo.RespuestaMala(nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'soporte')
+                            SendGmail(res.Body, correo, res.Header)
+                        }
+
+                    } catch (e) {
+                        const { Body, Header } = mensajesCorreo.Error(`Error correosDGM: ${e}, Error correosDGM`)
+
+                        SendGmail(Body, 'angel74977@gmail.com', Header)
+                    }
+
+                    try {
+                        let usuarioRs = mensajesCorreo.RespuestaMala(inspeccionador.nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'usuario')
+                        SendGmail(usuarioRs.Body, inspeccionador.correo, usuarioRs.Header)
+                    } catch (e) {
+                        const { Body, Header } = mensajesCorreo.Error(`Error correo inspeccionador: ${e}, Error correo inspeccionador`)
+
+                        SendGmail(Body, 'angel74977@gmail.com', Header)
+                    }
+
+
                     let res = mensajesCorreo.RespuestaMala(gerente.nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'gerente')
                     SendGmail(res.Body, gerente.correo, res.Header)
 
