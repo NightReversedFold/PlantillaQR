@@ -62,7 +62,7 @@ export default () => {
 
             <h2 className="mt-5 mb-5 text-2xl">Agregar usuario</h2>
 
-            {err ? <p>{err}</p> : <form className="flex flex-row gap-2" onSubmit={async (e) => {
+            {err ? <p>{err}</p> : <form className="flex flex-row gap-2 text-black" onSubmit={async (e) => {
                 e.preventDefault()
 
                 try {
@@ -102,42 +102,42 @@ export default () => {
                 }
 
             }}>
-                <div className="w-50 h-20 bg-slate-700">
+                <div className="w-50 h-20 bg-green-300">
                     <input value={patente} onChange={(e) => setPatente(e.currentTarget.value)} placeholder="Patente asociado" className="text-center w-full h-full" type="text" />
                 </div>
-                <div className="min'w-20 h-20 bg-slate-700">
+                <div className="min'w-20 h-20 bg-green-300">
 
                     <select className="text-center w-full h-full" onChange={(e) => {
                         setCargo(e.currentTarget.value);
                     }}>
                         <option hidden value="">Seleccionar cargo</option>
 
-                        <option className="bg-slate-700" value="Adm.Contratos">Adm.Contratos</option>
-                        <option className="bg-slate-700" value="Dueño">Dueño</option>
-                        <option className="bg-slate-700" value="Usuario">Usuario</option>
-                        <option className="bg-slate-700" value="Taller mecanico">Taller mecanico</option>
-                        <option className="bg-slate-700" value="SoporteDGM">SoporteDGM</option>
-                        <option className="bg-slate-700" value="SoporteDMH">SoporteDMH</option>
-                        <option className="bg-slate-700" value="SoporteDCH">SoporteDCH</option>
-                        <option className="bg-slate-700" value="SoporteDRT">SoporteDRT</option>
+                        <option className="bg-green-800" value="Adm.Contratos">Adm.Contratos</option>
+                        <option className="bg-green-800" value="Dueño">Dueño</option>
+                        <option className="bg-green-800" value="Usuario">Usuario</option>
+                        <option className="bg-green-800" value="Taller mecanico">Taller mecanico</option>
+                        <option className="bg-green-800" value="SoporteDGM">SoporteDGM</option>
+                        <option className="bg-green-800" value="SoporteDMH">SoporteDMH</option>
+                        <option className="bg-green-800" value="SoporteDCH">SoporteDCH</option>
+                        <option className="bg-green-800" value="SoporteDRT">SoporteDRT</option>
 
                     </select>
 
                 </div>
-                <div className="w-20 h-20 bg-slate-700">
+                <div className="w-20 h-20 bg-green-300">
                     <input value={nombre} onChange={(e) => setNombre(e.currentTarget.value)} placeholder="Nombre" className="text-center w-full h-full" type="text" required />
 
                 </div>
-                <div className="w-20 h-20 bg-slate-700">
+                <div className="w-20 h-20 bg-green-300">
                     <input value={rut} onChange={(e) => setRut(e.currentTarget.value)} placeholder="Rut" className="text-center w-full h-full" type="text" required />
 
                 </div>
-                <div className="w-20 h-20 bg-slate-700">
+                <div className="w-20 h-20 bg-green-300">
                     <input value={correo} onChange={(e) => setCorreo(e.currentTarget.value)} placeholder="Correo" className="text-center w-full h-full" type="email" required />
 
                 </div>
 
-                <button className="top-1/2 max-w-25 h-20 p-2 bg-blue-500" type="submit" >
+                <button className="top-1/2 max-w-25 h-20 p-2 bg-green-700" type="submit" >
                     Agregar
                 </button>
             </form>}
@@ -154,7 +154,6 @@ export default () => {
                         {element}
                     </div>
                 })}
-
 
                 {usuarios ?
 
