@@ -18,7 +18,7 @@ export default ({ msg, setMsg, archivos, setArchivos }: {
         }
     }, [msg])
 
-    return msg ? <p>{msg}</p> : < button className="w-1/2 mx-5 border-2 h-10 bg-blue-500 mt-10" onClick={async () => {
+    return msg ? <p>{msg}</p> : < button className="w-1/2 mx-5 border-2 h-10 bg-green-500 mt-10" onClick={async () => {
         setMsg('Cargando...')
 
         if (Object.keys(archivos).length <= 0) { setMsg('Tiene que haber al menos un archivo para subir.'); return }
