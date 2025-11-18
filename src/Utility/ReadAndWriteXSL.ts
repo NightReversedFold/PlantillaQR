@@ -116,6 +116,7 @@ export async function obtenerTablaTaller(patente: string) {
 
     return res.rows
 }
+
 export async function obtenerPatente(patente: string) {
     const res = await newC.query('SELECT patente,faena,marca,modelo,fecha_aprobacion_vehiculo,fecha_permiso_circulacion,fecha_revision_tecnica FROM Expeditor Where patente = $1', [patente])
 

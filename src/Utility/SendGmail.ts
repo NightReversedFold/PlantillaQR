@@ -1,5 +1,5 @@
 
-import { client_id,client_secret,refresh_token } from "./config";
+import { client_id, client_secret, refresh_token } from "./config";
 
 import fetch from "node-fetch";
 
@@ -10,8 +10,8 @@ async function obtenerAccessToken() {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
             client_id: client_id,
-            client_secret : client_secret,
-            refresh_token : refresh_token, 
+            client_secret: client_secret,
+            refresh_token: refresh_token,
             grant_type: "refresh_token"
         })
     });
@@ -21,7 +21,7 @@ async function obtenerAccessToken() {
     return data.access_token;
 }
 
-export default async (msg:string,para:string,subjetc:string) => {
+export default async (msg: string, para: string, subjetc: string) => {
     const accesToken = await obtenerAccessToken()
 
     const mensaje = [
@@ -39,7 +39,7 @@ export default async (msg:string,para:string,subjetc:string) => {
         .replace(/=+$/, "");
 
     const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
-        method: "POST", 
+        method: "POST",
         headers: {
             "Authorization": `Bearer ${accesToken}`,
             "Content-Type": "application/json"

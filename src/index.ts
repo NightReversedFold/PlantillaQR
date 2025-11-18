@@ -304,6 +304,6 @@ app.delete("/DeleteTb/:tb", async (req: Request<{
 
 escucharFechas()
 
-compararKilometrajes()
+//compararKilometrajes()
 
 checarUltimosChecklist()

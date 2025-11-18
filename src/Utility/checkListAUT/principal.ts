@@ -248,8 +248,8 @@ export default async (datos: InspeccionBody) => {
     }
 
     async function insertarRegistroValido(valores: any[]) {
-        newC.query(`INSERT INTO Checklist (vehiculo_volcan_nevado,fecha_de_envio,inspeccionado_por,fecha_inspeccion,kilometraje,kilometraje_proxima_mantencion,observaciones,analisis_del_bot_inspector_de_vehiculos,apto) 
-                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`, valores)
+        newC.query(`INSERT INTO Checklist (vehiculo_volcan_nevado,inspeccionado_por,fecha_inspeccion,kilometraje,kilometraje_proxima_mantencion,observaciones,analisis_del_bot_inspector_de_vehiculos,apto) 
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, valores)
     }
 
     try {
@@ -299,7 +299,6 @@ export default async (datos: InspeccionBody) => {
 
                 const newRow = [
                     nuevoObjeto.Principales.Patente.toUpperCase(),
-                    nuevoObjeto.Fecha,
                     nuevoObjeto.Principales["Inspeccionado por RUT"],
                     nuevoObjeto.Principales["Fecha inspección"],
                     nuevoObjeto.Principales.Kilometraje,
