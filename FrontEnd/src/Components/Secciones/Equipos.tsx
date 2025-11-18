@@ -30,7 +30,6 @@ const checkListLinks = {
     'TDXR19': 'https://docs.google.com/forms/d/e/1FAIpQLSdBpP49VQ5nEcqrnTh-LT_qLAPmCo6nZD4YjHmRGp_jVUcyuw/viewform?usp=header',
     'TDXL15': 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header',
     'TZTZ54': 'https://docs.google.com/forms/d/e/1FAIpQLScZlm_dLPHfrOO3IoUO5n2jbXQgkZVweuBtWeNgbPN8EoJ2YQ/viewform?usp=header'
-
 }
 
 export const contextoExcel = createContext<boolean>(false)
@@ -178,7 +177,7 @@ export default function Equipos() {
                                                     </div>
                                                 </div>
 
-                                                <Table ref={tablasConInstanciasDeCeldas.current.Checklist} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_minmax(500px,500px)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_minmax(500px,500px)_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist as any} />
+                                                <Table ref={tablasConInstanciasDeCeldas.current.Checklist} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_minmax(500px,500px)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto__auto_auto_minmax(500px,500px)_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist as any} />
 
 
                                             </>

@@ -13,10 +13,12 @@ import Kilometraje from "./Cells/Kilometraje";
 import ProxMant from "./Cells/ProxMant";
 import Apto from "./Cells/Apto";
 import EquipoACargo from "./Cells/EquipoACargo";
+import HoraDeEnvio from "./Cells/HoraDeEnvio";
 
 const Equivalencias: Record<string, any> = {
     Acreditado: Acreditacion,
     FechaRevisionTecnica: RvTecnica,
+    HoradelEnvío: HoraDeEnvio,
     'FechaPermisoCirculacion': PMCirculacion,
     Expiración: Expira,
     KilometrajePróximamantención: ProxMant,
@@ -64,13 +66,13 @@ const equivalentKeys = {
     fecha_expiracion_licencia_municipal: 'Fecha Expiración Licencia Municipal',
     fecha_de_expiracion_certificado_de_competencias: 'Fecha de Expiración Certificado de Competencias',
     equipo_a_cargo: 'Equipo a Cargo',
-    
+
     vehiculo_volcan_nevado: 'Vehiculo Volcan Nevado',
-    fecha_de_envio: 'Fecha de Envio',
-    inspeccionado_por: 'Insepaccionado Por:',
+    hora_de_envio: 'Hora del Envío',
+    inspeccionado_por: 'Inspeccionado Por:',
     fecha_inspeccion: 'Fecha Inspección',
     kilometraje: 'Kilometraje',
-    cargo:'Cargo del Personal',
+    cargo: 'Cargo del Personal',
     kilometraje_proxima_mantencion: 'Kilometraje Próxima mantención',
     analisis_del_bot_inspector_de_vehiculos: 'Análisis del bot inspector de vehículos:',
     apto: 'Apto'
@@ -161,6 +163,7 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
             {
                 filas.map((row, indx) => {
                     return Object.values(row).map((rowStr, rowindx) => {
+                        const crudo = rowStr
 
                         if (rowStr && typeof rowStr !== 'number' && !isNaN(Date.parse(rowStr))) {
                             const [anio, mes, dia] = rowStr.split('T')[0].replace(/-/g, '/').split('/')
@@ -174,13 +177,12 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
 
                         let datoWs = keyEquivalence.replace(/\s+/g, '')
 
-
                         const key = `${datoWs}_${indx}`
                         celdasObj.current[key] = createRef<celdaProps>()
 
                         Celda = Equivalencias[datoWs] || EquivalenciasPersonal[datoWs] || Cell
 
-                        return Celda ? <Celda key={rowindx} dato={rowStr ? String(rowStr) : ''} ref={celdasObj.current[key]} celdasRf={celdasObj} fila={indx} /> : null
+                        return Celda ? <Celda key={rowindx} datoCrudo={crudo} dato={rowStr ? String(rowStr) : ''} ref={celdasObj.current[key]} celdasRf={celdasObj} fila={indx} /> : null
 
                     })
                 })
