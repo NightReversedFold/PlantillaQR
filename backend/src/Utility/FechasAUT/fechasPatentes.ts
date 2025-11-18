@@ -128,7 +128,7 @@ export async function compararKilometrajes() {
                                                     t1.kilometraje_proxima_mantencion
                                                 FROM Checklist t1
                                                 INNER JOIN Usuarios t2 ON t2.patente = t1.vehiculo_volcan_nevado
-                                                ORDER BY t1.vehiculo_volcan_nevado, t1.fecha_de_envio DESC`)
+                                                ORDER BY t1.indice DESC`)
 
         for (const fila of checklists.rows) {
             const { vehiculo_volcan_nevado, kilometraje_proxima_mantencion, kilometraje } = fila
