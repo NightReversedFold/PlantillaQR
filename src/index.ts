@@ -242,7 +242,7 @@ app.post('/SetUsers', async (req, res) => {
         ])
 
         console.log(resx)
-        
+
         checarUltimosChecklist()
 
         res.status(200).json({ msg: 'Usuario agregado existosamente.', indice: resx.rows[0].indice })
@@ -263,6 +263,51 @@ app.get('/GetUsers', async (req, res) => {
     } catch (e) {
         console.log(e)
         res.status(400).json({ msg: 'Algo salió mal.' })
+    }
+})
+
+app.get('/ValidarChecklist/:token/:nombre', async (req: Request<{
+    token: string,
+    nombre: string
+}>, res) => {
+    const { token, nombre } = req.params
+
+    try {
+        const checklist = await newC.query(`SELECT fecha_inspeccion,hora_de_envio,validado FROM checklist WHERE token_checklist = $1`, [token])
+
+        if (checklist.rows[0]) {
+
+            const { fecha_inspeccion, hora_de_envio, validado } = checklist.rows[0]
+
+            if (validado) { res.send('Este checklist ya ha sido validado.'); return }
+
+            const now = await newC.query('SELECT NOW()')
+            const fechaActual = new Date(now.rows[0].now)
+
+            const fechaConvertida = new Date(`${fecha_inspeccion}T${hora_de_envio}`)
+
+            const limite = new Date(fechaConvertida.getTime() + 24 * 60 * 60 * 1000)
+
+            if (fechaActual > limite) {
+                res.send('Ya pasó el tiempo límite para validar este checklist.')
+                return
+            }
+
+            await newC.query(`
+                    UPDATE checklist
+                    SET validado = $2
+                    WHERE token_checklist = $1
+                `, [token,nombre])
+
+            io.emit('actualizarExcel')
+            res.send('Checklist validado correctamente.')
+        } else {
+            res.send('No se encontró el checklist.')
+        }
+
+    } catch (e) {
+        res.send(`Algo salió mal a la hora de intentar validar el checklist: ${e}.`)
+
     }
 })
 

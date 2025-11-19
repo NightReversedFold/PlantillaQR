@@ -1,7 +1,7 @@
 
 import OpenAI from "openai";
 
-import { OPENAI_API_KEY } from "../config";
+import { backend, OPENAI_API_KEY } from "../config";
 import SendGmail from "../SendGmail";
 
 import { newC } from "../ReadAndWriteXSL";
@@ -73,20 +73,31 @@ const posibleNumero = (nm: string) => {
 export const mensajesCorreo = {
     'KilometrajeMayorQueProxMant': (filaTallerNombre: string, patente: string) => {
         return {
-            Body: `Buen dia ${filaTallerNombre} se envía este correo para informarle que el kilometraje puesto en el checklist de la patente ${patente} es mayor que el kilometraje de la próxima mantención.`,
+            Body: `<p>Buen dia ${filaTallerNombre} se envía este correo para informarle que el kilometraje puesto en el checklist de la patente ${patente} es mayor que el kilometraje de la próxima mantención.</p>`,
             Header: `Inspeccion de vehiculo no apto patente: ${patente}`
         }
     },
     'ProxMantDistintos': (filaTallerNombre: string, patente: string) => {
         return {
-            Body: `Buen dia ${filaTallerNombre} se le envía este correo para informarle que los kilometrajes de la patente ${patente} de la próxima mantención del checklist y de la base de datos del taller son distintos`,
+            Body: `<p>Buen dia ${filaTallerNombre} se le envía este correo para informarle que los kilometrajes de la patente ${patente} de la próxima mantención del checklist y de la base de datos del taller son distintos</p>`,
             Header: `Inspeccion de vehiculo no apto patente: ${patente}`
         }
     },
 
-    'RespuestaMala': (nombre: string, patente: string, recomendacionesBot: string, descripcionBot: string, tipo: 'gerente' | 'taller' | 'soporte' | 'usuario') => {
+    'RespuestaMala': (nombre: string, patente: string, recomendacionesBot: string, descripcionBot: string, tipo: 'gerente' | 'taller' | 'soporte' | 'usuario', encuesta?: string, token_checklist?: string) => {
         return {
-            Body: `Buen dia ${nombre} se envía este correo para informarle que ${tipo == 'gerente' ? 'su' : 'el'} vehículo ${patente} no pasó la inspección. Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:\n ${recomendacionesBot}\n${descripcionBot}`,
+            Body: `<p>Buen dia ${nombre} se envía este correo para informarle que ${tipo == 'gerente' ? 'su' : 'el'} vehículo ${patente} no pasó la inspección.</p> 
+                   <p>Este es el análisis de nuestro sistema de control de equipos Volcan Nevado 2025:</p>
+                   
+                   <p>${recomendacionesBot}\n${descripcionBot}</p>
+                   
+                   ${tipo === 'soporte' || tipo === 'gerente' ?
+                    `<p>Podrá validar el checklist con el siguiente link en base a los datos del formulario: <a href="${backend}/ValidarChecklist/${token_checklist}/${nombre}">presionar aquí</a> 
+                    <br>
+                    Datos del formulario:
+                    <br>
+                    ${encuesta}</p>` : ''}`,
+
             Header: `Inspeccion de vehiculo no apto patente: ${patente}`
 
         }
@@ -95,11 +106,11 @@ export const mensajesCorreo = {
     'NoSeHizoUltimoChecklist': (patente: string, nombre: string, personal: 'Duenio' | 'Soporte' | 'Adm.Contratos') => {
         return {
             Body: personal === 'Duenio' ?
-                `Buen dia ${nombre}: Se le pide por favor que haga el chequeo del vehículo ${patente}, usar código QR del equipo.` :
+                `<p>Buen dia ${nombre}: Se le pide por favor que haga el chequeo del vehículo ${patente}, usar código QR del equipo.</p>` :
                 personal === 'Adm.Contratos' ?
-                    `Buen dia ${nombre}: Se le envía este correo para informarle que no se ha realizado el checklist de la patente ${patente} del dia de hoy.` :
+                    `<p>Buen dia ${nombre}: Se le envía este correo para informarle que no se ha realizado el checklist de la patente ${patente} del dia de hoy.</p>` :
                     personal === 'Soporte' ?
-                        `Buen dia ${nombre}: Se le envía este correo para informarle que no se ha realizado el checklist de la patente ${patente} del dia de hoy.` : null
+                        `<p>Buen dia ${nombre}: Se le envía este correo para informarle que no se ha realizado el checklist de la patente ${patente} del dia de hoy.</p>` : null
             ,
             Header: `Realizar formulario del vehiculo`
         }
@@ -224,6 +235,18 @@ export default async (datos: InspeccionBody) => {
         return objetoATexto
     }
 
+
+    function multiplesATextHTML() {
+        let objetoATexto = ''
+
+        Object.keys(nuevoObjeto.Multiples).forEach(pregunta => {
+            objetoATexto = objetoATexto + `<p>${pregunta.replace(/[\[\]]/g, "").trim()} : ${nuevoObjeto.Multiples[pregunta].trim()}</p>`
+
+        })
+
+        return objetoATexto
+    }
+
     async function botInspector() {
         return await client.chat.completions.create({
             response_format: { type: "json_object" },
@@ -248,8 +271,8 @@ export default async (datos: InspeccionBody) => {
     }
 
     async function insertarRegistroValido(valores: any[]) {
-        newC.query(`INSERT INTO Checklist (vehiculo_volcan_nevado,inspeccionado_por,fecha_inspeccion,kilometraje,kilometraje_proxima_mantencion,observaciones,analisis_del_bot_inspector_de_vehiculos,apto) 
-                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`, valores)
+        return newC.query(`INSERT INTO Checklist (vehiculo_volcan_nevado,inspeccionado_por,fecha_inspeccion,kilometraje,kilometraje_proxima_mantencion,observaciones,analisis_del_bot_inspector_de_vehiculos,apto) 
+                    VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING token_checklist`, valores)
     }
 
     try {
@@ -308,7 +331,7 @@ export default async (datos: InspeccionBody) => {
                     respuestaMala
                 ]
 
-                insertarRegistroValido(newRow)
+                const token = await insertarRegistroValido(newRow)
 
                 if (respuestaMala || resBotJSON.Escala < 3) {
 
@@ -316,7 +339,7 @@ export default async (datos: InspeccionBody) => {
                         const correosDGM = await obtenerSoporteDGM()
 
                         for (const { nombre, correo } of correosDGM) {
-                            let res = mensajesCorreo.RespuestaMala(nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'soporte')
+                            let res = mensajesCorreo.RespuestaMala(nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'soporte', multiplesATextHTML(), token.rows[0].token_checklist)
                             SendGmail(res.Body, correo, res.Header)
                         }
 
@@ -336,7 +359,7 @@ export default async (datos: InspeccionBody) => {
                     }
 
 
-                    let res = mensajesCorreo.RespuestaMala(gerente.nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'gerente')
+                    let res = mensajesCorreo.RespuestaMala(gerente.nombre, nuevoObjeto.Principales.Patente.toUpperCase(), resBotJSON.Recomendaciones.trim(), resBotJSON.Descripcion.trim(), 'gerente', multiplesATextHTML(), token.rows[0].token_checklist)
                     SendGmail(res.Body, gerente.correo, res.Header)
 
                     const tallerF: any = await taller

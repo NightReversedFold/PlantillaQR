@@ -1,8 +1,6 @@
 
 import { client_id, client_secret, refresh_token } from "./config";
 
-import fetch from "node-fetch";
-
 async function obtenerAccessToken() {
 
     const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -21,22 +19,27 @@ async function obtenerAccessToken() {
     return data.access_token;
 }
 
-export default async (msg: string, para: string, subjetc: string) => {
+export default async (msg: string, para: string, subject: string) => {
     const accesToken = await obtenerAccessToken()
+
+    const subjectEncoded = `=?UTF-8?B?${Buffer.from(subject, "utf8").toString("base64")}?=`;
 
     const mensaje = [
         "From: Automatizacion ConeXion Process <automatizacion@ilogica-soluciones.cl>",
         `To: ${para}`,
-        `Subject: ${subjetc}`,
+        `Subject: ${subjectEncoded}`,
+        'Content-Type: text/html; charset="UTF-8"',
+        "Content-Transfer-Encoding: 8bit",
         "",
         `${msg}`
     ].join("\n");
 
-    const raw = Buffer.from(mensaje)
-        .toString("base64")
+    const raw = Buffer.from(mensaje, "utf-8")
+        .toString("base64") 
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
         .replace(/=+$/, "");
+
 
     const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
         method: "POST",
