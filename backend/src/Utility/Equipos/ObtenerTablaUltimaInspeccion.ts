@@ -4,7 +4,7 @@ type reduceType = Record<string, string[]>
 
 
 export default async function obtenerTablaDePatenteDeChecklist(patente: string): Promise<reduceType> {
-    const res = await newC.query(`SELECT vehiculo_volcan_nevado,inspeccionado_por,hora_de_envio,fecha_inspeccion,kilometraje,kilometraje_proxima_mantencion,analisis_del_bot_inspector_de_vehiculos,apto FROM Checklist WHERE vehiculo_volcan_nevado = $1 ORDER BY indice DESC LIMIT 1`, [patente])
+    const res = await newC.query(`SELECT vehiculo_volcan_nevado,inspeccionado_por,hora_de_envio,fecha_inspeccion,kilometraje,kilometraje_proxima_mantencion,analisis_del_bot_inspector_de_vehiculos,apto,validado FROM Checklist WHERE vehiculo_volcan_nevado = $1 ORDER BY indice DESC LIMIT 1`, [patente])
 
     const nombreByRut = await newC.query(`SELECT nombre FROM usuarios WHERE regexp_replace(rut, '[^0-9]', '', 'g') = regexp_replace($1,'[^0-9]','','g')`, [res.rows[0].inspeccionado_por])
 

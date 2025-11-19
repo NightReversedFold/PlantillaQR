@@ -1,4 +1,4 @@
-import React, { useRef, createRef, forwardRef, useImperativeHandle, useEffect, useState } from "react";
+import React, { useRef, createRef, forwardRef, useImperativeHandle, useEffect, useState, type PropsWithChildren } from "react";
 
 import type { celdaProps } from "./Cells/Cell";
 
@@ -14,6 +14,8 @@ import ProxMant from "./Cells/ProxMant";
 import Apto from "./Cells/Apto";
 import EquipoACargo from "./Cells/EquipoACargo";
 import HoraDeEnvio from "./Cells/HoraDeEnvio";
+import Validado from "./Cells/Validado";
+import Validacion from "./Cells/Validacion";
 
 const Equivalencias: Record<string, any> = {
     Acreditado: Acreditacion,
@@ -25,7 +27,12 @@ const Equivalencias: Record<string, any> = {
     'ProximaMantencion': ProxMant,
     Observaciones,
     Kilometraje,
-    Apto
+    Apto,
+    Validacion_h: Validacion
+}
+
+const EquivalenciasCabeceras: Record<string, any> = {
+    Validacion_h: Validado
 }
 
 const EquivalenciasPersonal: Record<string, any> = {
@@ -38,7 +45,8 @@ const EquivalenciasPersonal: Record<string, any> = {
     'FechadeExpiracióndeDocumentodeÁreasCircularesdelPersonal': Expira,
     'FechaExpiraciónLicenciaMunicipal': Expira,
     'FechadeExpiraciónCertificadodeCompetencias': Expira,
-    'Equipoacargo': EquipoACargo
+    'Equipoacargo': EquipoACargo,
+    'Validacion': Validacion
 }
 
 const equivalentKeys = {
@@ -48,7 +56,7 @@ const equivalentKeys = {
     patente: 'Patente',
     faena: 'Faena',
     marca: 'Marca',
-
+    validado: 'Validacion_h',
     proxima_mantencion: 'Proxima Mantencion',
     fecha_ultima_mantencion: 'Fecha Ultima Mantencion',
     resumen_ultima_mantencion: 'Resumen Ultima Mantencion',
@@ -78,16 +86,16 @@ const equivalentKeys = {
     apto: 'Apto'
 }
 
-type tablaProps = {
+type tablaProps = PropsWithChildren<{
     formato: string;
     objetoType: 'object' | 'string';
     clampTable: number;
     tabla: Record<string, string[]>[];
-}
+}>
 
 export type celdasObj = Record<string, any>
 
-export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTable, tabla }, ref) => {
+export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTable, tabla, children }, ref) => {
 
     const celdasObj = useRef<celdasObj>({})
 
@@ -144,18 +152,22 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
 
     return filas ? <div className='w-full flex flex-col justify-center items-center text-center'>
 
-        <div style={clampTable == 2 ? { fontSize: 'clamp(7px, 2vw, 18px)' } : undefined} className={`overflow-auto  grid ${formato} grid-rows-auto flex flex-col w-full text-center border-2 p-2`}>
+        <div style={clampTable == 2 ? { fontSize: 'clamp(7px, 2vw, 18px)' } : undefined} className={`overflow-auto grid ${formato} grid-rows-auto flex flex-col w-full text-center border-2 p-2`}>
 
             {
                 //  <div className=" relative flex flex-row ">
                 //  {   
-                Object.keys(filas[0]).map((headerStr, indx) => {
+                Object.keys(filas[0]).map((headerStr, rowindx) => {
                     if (equivalentKeys.hasOwnProperty(headerStr)) {
                         headerStr = (equivalentKeys as any)[headerStr]
                     }
-                    return <div key={indx} className='Header border-2 p-2 bg-[#0c0c0e] w-full  '>
-                        {headerStr.replace(/\s/g, '') == '' ? 'Sin dato.' : headerStr.trim()}
-                    </div>
+
+                    let Celda: React.ComponentType<any> | null = null
+
+
+                    Celda = EquivalenciasCabeceras[headerStr.replace(/\s+/g, '')] || Cell
+
+                    return Celda ? <Celda key={rowindx} indx={rowindx} dato={headerStr.replace(/\s/g, '') == '' ? 'Sin dato.' : headerStr.trim()} celdasRf={celdasObj} fila={rowindx} cabecera={true} /> : null
                 })
                 //    }
                 //  </div>
@@ -163,7 +175,6 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
             {
                 filas.map((row, indx) => {
                     return Object.values(row).map((rowStr, rowindx) => {
-                        const crudo = rowStr
 
                         if (rowStr && typeof rowStr !== 'number' && !isNaN(Date.parse(rowStr))) {
                             const [anio, mes, dia] = rowStr.split('T')[0].replace(/-/g, '/').split('/')
@@ -180,15 +191,16 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
                         const key = `${datoWs}_${indx}`
                         celdasObj.current[key] = createRef<celdaProps>()
 
+                        console.log(key,rowStr)
                         Celda = Equivalencias[datoWs] || EquivalenciasPersonal[datoWs] || Cell
 
-                        return Celda ? <Celda key={rowindx} datoCrudo={crudo} dato={rowStr ? String(rowStr) : ''} ref={celdasObj.current[key]} celdasRf={celdasObj} fila={indx} /> : null
+                        return Celda ? <Celda key={rowindx} indx={rowindx} dato={rowStr ? String(rowStr) : ''} ref={celdasObj.current[key]} celdasRf={celdasObj} fila={indx} /> : null
 
                     })
                 })
-
             }
 
+            {children}
         </div>
 
     </div> : error ? <p className='text-center text-red-500 text-3xl'> {JSON.stringify(error)} </p> : <p className='text-center text-red-500 text-3xl'>Error desconocido. Intenta recargar la página.</p>

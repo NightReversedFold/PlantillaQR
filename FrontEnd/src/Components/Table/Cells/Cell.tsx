@@ -3,10 +3,14 @@ import type { popOutObj } from "../../Diseño/info"
 
 export type celdaProps = {
     dato?: string,
+    indx?: number,
+    celdasRf?:React.RefObject<celdasObj>,
+    cabecera?: boolean,
     popOutFuncion?: (fun: popOutObj | null) => void
 }
 import { contextoCeldaActualizada, contextoExcel, contextoPopout } from "../../Secciones/Equipos"
 import { contextoPopoutPersonal } from "../../Secciones/Personas"
+import type { celdasObj } from "../Table"
 
 export type bgColor = `bg-${string}`
 export type textColor = `text-${string}`
@@ -20,7 +24,7 @@ export type objetoCelda = {
     cambiarContenidoConFuncion: (callback: (ultValor: contenido) => string) => void
 }
 
-export default forwardRef<objetoCelda, celdaProps>(({ dato, popOutFuncion }, ref) => {
+export default forwardRef<objetoCelda, celdaProps>(({ dato, cabecera, popOutFuncion }, ref) => {
     const [contenido, setContenido] = useState<contenido>(typeof dato === 'string' ? dato != '' ? dato.trim() : 'Sin dato.' : null)
     const actualizacionExcel = useContext(contextoExcel)
 
@@ -66,7 +70,7 @@ export default forwardRef<objetoCelda, celdaProps>(({ dato, popOutFuncion }, ref
         popOutFuncion?.(popout)
 
         popout?.visibilidad(true)
-    }} className={`Relative w-full ${bgColor} min-h-30 border-2 p-2 align-middle ${contenido === 'Sin dato.' ? 'text-red-400' : contenido !== 'Sin dato.' && contenido ? color : null}`} >
+    }} className={`${cabecera ? 'Header border-2 p-2 bg-[#0c0c0e]' : 'min-h-30'} Relative w-full ${bgColor} border-2 p-2 align-middle ${contenido === 'Sin dato.' ? 'text-red-400' : contenido !== 'Sin dato.' && contenido ? color : null}`} >
         {contenido}
     </div>
 })

@@ -177,7 +177,9 @@ export default function Equipos() {
                                                     </div>
                                                 </div>
 
-                                                <Table ref={tablasConInstanciasDeCeldas.current.Checklist} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_minmax(500px,500px)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto__auto_auto_minmax(500px,500px)_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist as any} />
+                                                <Table ref={tablasConInstanciasDeCeldas.current.Checklist} formato={clampTable == 1 ? 'grid-cols-[auto_auto_auto_auto_auto_auto_minmax(500px,500px)_auto]' : clampTable == 2 ? 'grid-cols-[auto_auto_auto_auto__auto_auto_minmax(500px,500px)_auto]' : 'grid-cols-[auto]'} objetoType={typeof tablas.Checklist as 'object' | 'string'} clampTable={clampTable} tabla={tablas.Checklist as any} >
+                                                
+                                                </Table>
 
 
                                             </>
