@@ -21,7 +21,7 @@ const parseFecha = (fecha: string): Date => {
 
     const [ dia,mes, anio] = fecha.split('/').map(Number)
 
-    return new Date(anio,mes-1,dia) //Date(anio, mes - 1, dia)
+    return new Date(anio,mes-1,dia) 
 }
 
 const obtenerRestaDeFechasEnDias = (fecha: Date) => {

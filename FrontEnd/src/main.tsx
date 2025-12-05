@@ -13,6 +13,7 @@ import DBHandler from './Components/Secciones/DBHandler.tsx';
 import UploadExpeditor from './Components/ComponentesDB/UploadFields/UploadExpeditor.tsx';
 import UploadPersonal from './Components/ComponentesDB/UploadFields/UploadPersonal.tsx';
 import UploadTaller from './Components/ComponentesDB/UploadFields/UploadTaller.tsx';
+import Registros from './Components/Secciones/Registros.tsx';
 
 const router = createBrowserRouter([{
   path: '/',
@@ -34,9 +35,12 @@ const router = createBrowserRouter([{
   path: "Upload/Taller",
   element: <UploadTaller />
 
-},{
-  path:"UserH",
-  element:<DBHandler/>
+}, {
+  path: "Registros",
+  element: <Registros />
+}, {
+  path: "UserH",
+  element: <DBHandler />
 }], {
   basename: '/PlantillaQr'
 
