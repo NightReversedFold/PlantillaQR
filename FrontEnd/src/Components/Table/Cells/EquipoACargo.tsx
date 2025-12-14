@@ -8,8 +8,6 @@ export default ({ dato }: celdaProps) => {
 
     const [equipoACargo, setEquipoACargo] = useState<string | null>(null)
 
-    console.log('xddxdxdxd')
-
     useEffect(() => {
         console.log(equipoACargo, dato)
         if (!dato?.trim() || dato?.trim() == '') {

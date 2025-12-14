@@ -6,6 +6,13 @@ import { contextoCeldaActualizada, contextoExcel } from "../../Secciones/Equipos
 
 type apt = 1 | 2 | 3
 
+const mensajes = {
+    'false': 'El conductor está apto para conducir',
+    'true': 'El conductor no está apto para conducir.',
+    '1': 'El kilometraje es ílogico.',
+    '2': 'El kilometraje es mayor al kilometraje de la próxima mantención'
+}
+
 export type aptoTp = {
 
     setApto: (val: apt) => void
@@ -48,12 +55,9 @@ export default forwardRef<aptoTp, celdaProps>(({ dato, celdasRf }, ref) => {
 
     return <Cell popOutFuncion={(popout) => {
         popout?.cambiarContenido(<>
-            {apto === 1 ?
-                < p className="text-green-500">El conductor está apto para conducir.</p > : apto === 3 ?
-                    <p className="text-red-500">El conductor no está apto para conducir.</p> :
-                    <p className="text-yellow-500">
-                        El checklist tuvo puntos negativos, pero fue validado.
-                    </p>}
+            {<p className={`
+                ${apto == 1 ? 'text-green-500' : apto === 3 ? 'text-red-500' : 'text-yellow-500'}
+            `}>{apto === 2 ? 'El checklist tuvo puntos negativos, pero fue validado.' : dato && mensajes.hasOwnProperty(dato) ? mensajes[dato] : ''}</p>}
 
         </>)
     }} ref={celda} />

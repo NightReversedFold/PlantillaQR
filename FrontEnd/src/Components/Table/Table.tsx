@@ -175,7 +175,7 @@ export default forwardRef<celdasObj, tablaProps>(({ formato, objetoType, clampTa
                 filas.map((row, indx) => {
                     return Object.values(row).map((rowStr, rowindx) => {
 
-                        if (rowStr && typeof rowStr !== 'number' && !isNaN(Date.parse(rowStr))) {
+                        if (rowStr && typeof rowStr !== 'number' && isNaN(Number(rowStr)) && !isNaN(Date.parse(rowStr))) {
                             const [anio, mes, dia] = rowStr.split('T')[0].replace(/-/g, '/').split('/')
 
                             rowStr = `${dia}/${mes}/${anio}`
