@@ -6,7 +6,7 @@ import { contextoCeldaActualizada, contextoExcel } from "../../Secciones/Equipos
 
 type apt = 1 | 2 | 3
 
-const mensajes = {
+const mensajes:any = {
     'false': 'El conductor está apto para conducir',
     'true': 'El conductor no está apto para conducir.',
     '1': 'El kilometraje es ílogico.',
